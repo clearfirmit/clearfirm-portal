@@ -384,30 +384,81 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Upload HTML Files -->
                         <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload Business Data</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload HTML Source Files</h3>
                             <form id="uploadForm" class="space-y-4">
                                 <div>
                                     <label for="uploadEin" class="block text-sm font-medium text-gray-700">Business EIN</label>
-                                    <input type="text" id="uploadEin" name="ein" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+                                    <input type="text" id="uploadEin" name="ein" placeholder="XX-XXXXXXX" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
                                 </div>
                                 
                                 <div>
-                                    <label for="htmlFile" class="block text-sm font-medium text-gray-700">HTML Data File</label>
-                                    <input type="file" id="htmlFile" name="htmlFile" accept=".html" class="mt-1 block w-full">
+                                    <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
+                                    <input type="text" id="businessName" name="businessName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="htmlContent" class="block text-sm font-medium text-gray-700">Paste HTML File Content</label>
+                                    <textarea id="htmlContent" name="htmlContent" rows="8" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 font-mono text-xs" placeholder="Paste the entire HTML file content here..."></textarea>
+                                    <p class="mt-1 text-xs text-gray-500">Paste the complete HTML source file from your expert network</p>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700">Or Upload HTML File</label>
+                                    <input type="file" id="htmlFile" accept=".html,.htm" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
                                 </div>
                                 
                                 <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                    Upload Data
+                                    Process HTML Data
                                 </button>
                             </form>
                         </div>
                         
-                        <!-- Admin Queue -->
+                        <!-- Data Extraction Preview -->
                         <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Request Queue (Admin View)</h3>
-                            <div id="adminQueue" class="space-y-3 max-h-96 overflow-y-auto">
-                                <!-- Admin queue items will be populated here -->
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Data Extraction Preview</h3>
+                            <div id="extractionPreview" class="space-y-4">
+                                <p class="text-sm text-gray-600">Upload an HTML file to see extracted data fields</p>
+                                
+                                <div class="hidden" id="extractedFields">
+                                    <h4 class="font-medium text-sm mb-2">Extracted Fields:</h4>
+                                    <div class="bg-gray-50 p-3 rounded text-xs space-y-1 max-h-64 overflow-auto">
+                                        <!-- Extracted data will appear here -->
+                                    </div>
+                                    
+                                    <div class="mt-4 space-y-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700">Risk Level</label>
+                                            <select id="manualRiskLevel" class="mt-1 block w-full px-2 py-1 text-sm border border-gray-300 rounded">
+                                                <option>AUTO-DETECT</option>
+                                                <option>LOW RISK</option>
+                                                <option>MEDIUM RISK</option>
+                                                <option>MEDIUM-HIGH RISK</option>
+                                                <option>HIGH RISK</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <button onclick="createBusinessProfile()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 text-sm">
+                                            Create Business Profile
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Processing Queue -->
+                    <div class="mt-6 bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Processing Queue</h3>
+                        <div id="processingQueue" class="space-y-2">
+                            <p class="text-sm text-gray-600">No files being processed</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Recently Added Businesses -->
+                    <div class="mt-6 bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recently Added Businesses</h3>
+                        <div id="recentBusinesses" class="space-y-2">
+                            <!-- Will be populated dynamically -->
                         </div>
                     </div>
                 </div>
@@ -455,6 +506,102 @@
         
         // Sample Business Data
         const sampleBusinesses = {
+            '47-4030404': {
+                name: 'PSQUARED MEDICALS, INC',
+                ein: '47-4030404',
+                businessType: 'Corporation',
+                address: '4809 Argonne St Ste 155, Denver, CO 80249',
+                industry: 'Medical Services',
+                riskScore: 72,
+                riskLevel: 'MEDIUM RISK',
+                riskDescription: 'Established medical services provider with moderate risk profile',
+                criticalIndicators: [
+                    { type: 'success', title: 'Active Operations', description: 'Business actively operating in medical services sector' },
+                    { type: 'info', title: 'Colorado Registration', description: 'Properly registered in Colorado' },
+                    { type: 'warning', title: 'New to Platform', description: 'First-time verification on ClearFirm' }
+                ],
+                financialMetrics: {
+                    revenue2023: 2850000,
+                    revenue2022: 2400000,
+                    revenueChange: 18.75,
+                    operatingIncome2023: 285000,
+                    operatingIncome2022: 220000,
+                    operatingIncomeChange: 29.5,
+                    totalAssets2023: 1200000,
+                    totalAssets2022: 950000,
+                    assetsChange: 26.3,
+                    debtToAssetRatio: 35.5,
+                    liquidityScore: 68
+                },
+                payrollCompliance: {
+                    status: 'CURRENT',
+                    employeeCount: 28,
+                    totalPayroll2023: 1400000,
+                    payrollAsPercentRevenue: 49.1,
+                    lastFilingDate: '2025-06-15',
+                    complianceAlerts: []
+                },
+                recommendations: {
+                    creditLimit: 150000,
+                    requiredDocumentation: ['Current financial statements', 'Business licenses', 'Insurance verification'],
+                    riskFactors: ['High payroll ratio', 'Moderate debt levels'],
+                    positiveFactors: ['Revenue growth', 'Current compliance', 'Established operations'],
+                    terms: {
+                        interestRate: 'Prime + 2.5%',
+                        collateralRequired: 'Business assets',
+                        personalGuarantee: 'Required',
+                        covenants: ['Monthly financial reporting', 'Maintain insurance coverage']
+                    }
+                }
+            },
+            '99-2296965': {
+                name: 'iTech LLC',
+                ein: '99-2296965',
+                businessType: 'Limited Liability Company',
+                address: '735 E Palmer Ave Apt 106, Glendale, CA 91205-4702',
+                industry: 'Technology Services',
+                riskScore: 65,
+                riskLevel: 'MEDIUM RISK',
+                riskDescription: 'Small technology services firm with limited operating history',
+                criticalIndicators: [
+                    { type: 'warning', title: 'Residential Address', description: 'Business registered to residential apartment' },
+                    { type: 'info', title: 'LLC Structure', description: 'Limited liability company in California' },
+                    { type: 'warning', title: 'Limited Credit History', description: 'Less than 3 years of financial data available' }
+                ],
+                financialMetrics: {
+                    revenue2023: 485000,
+                    revenue2022: 280000,
+                    revenueChange: 73.2,
+                    operatingIncome2023: 92000,
+                    operatingIncome2022: 45000,
+                    operatingIncomeChange: 104.4,
+                    totalAssets2023: 125000,
+                    totalAssets2022: 65000,
+                    assetsChange: 92.3,
+                    debtToAssetRatio: 22.5,
+                    liquidityScore: 58
+                },
+                payrollCompliance: {
+                    status: 'CURRENT',
+                    employeeCount: 3,
+                    totalPayroll2023: 195000,
+                    payrollAsPercentRevenue: 40.2,
+                    lastFilingDate: '2025-06-20',
+                    complianceAlerts: ['Home-based business']
+                },
+                recommendations: {
+                    creditLimit: 25000,
+                    requiredDocumentation: ['Bank statements', 'Client contracts', 'Owner personal guarantee', 'Business plan'],
+                    riskFactors: ['Home-based operation', 'Limited assets', 'Short operating history'],
+                    positiveFactors: ['Strong growth trajectory', 'Low debt', 'Tech sector opportunities'],
+                    terms: {
+                        interestRate: 'Prime + 4%',
+                        collateralRequired: 'All business assets',
+                        personalGuarantee: 'Required from all members',
+                        covenants: ['Weekly cash flow reporting', 'Client concentration limits', 'No distributions without approval']
+                    }
+                }
+            },
             'XX-XXX2375': {
                 name: 'Star Discount Pharmacy Inc',
                 ein: 'XX-XXX2375',
@@ -708,10 +855,14 @@
             }
             
             // Check if we have sample data
-            const formattedEin = 'XX-XXX' + ein.slice(-4);
-            if (sampleBusinesses[formattedEin]) {
+            const formattedEin = ein.replace(/-/g, '') === ein ? 
+                ein.slice(0, 2) + '-' + ein.slice(2) : 
+                ein;
+            
+            if (sampleBusinesses[formattedEin] || sampleBusinesses[ein]) {
                 // Show immediate result
-                displaySearchResult(sampleBusinesses[formattedEin]);
+                const business = sampleBusinesses[formattedEin] || sampleBusinesses[ein];
+                displaySearchResult(business);
                 
                 // Track verification
                 credits -= 8;
