@@ -1,0 +1,11 @@
+{
+  "name": "clearfirm-portal",
+  "version": "1.0.0",
+  "description": "ClearFirm Business Intelligence Portal",
+  "scripts": {
+    "dev": "echo 'No dev server needed for static HTML'"
+  },
+  "keywords": ["business", "intelligence", "clearfirm"],
+  "author": "ClearFirm",
+  "license": "ISC"
+}
