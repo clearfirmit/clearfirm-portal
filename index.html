@@ -1346,6 +1346,147 @@
             const business = state.businesses.find(b => b.id == businessId);
             if (!business) return;
             
+            // Different views for admin vs customer
+            if (state.currentUser.role === 'admin') {
+                // Admin can see transcript details
+                showAdminBusinessDetails(business);
+            } else {
+                // Customer sees only aggregated analysis
+                showCustomerBusinessDetails(business);
+            }
+        }
+        
+        // Customer view - aggregated analysis only
+        function showCustomerBusinessDetails(business) {
+            const latestTranscript = business.transcripts ? business.transcripts[business.transcripts.length - 1] : null;
+            const data = latestTranscript ? latestTranscript.data : business;
+            const risk = business.riskAssessment || { risk_level: 'LOW', risk_score: 0 };
+            
+            // Get historical data for trends
+            const historicalData = [];
+            if (business.transcripts) {
+                business.transcripts.forEach(t => {
+                    if (t.data && t.data.tax_period && t.data.gross_receipts) {
+                        historicalData.push({
+                            year: t.data.tax_period.substring(0, 4),
+                            revenue: t.data.gross_receipts,
+                            income: t.data.ordinary_income_loss
+                        });
+                    }
+                });
+            }
+            
+            const modalHTML = `
+                <div class="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-auto">
+                    <!-- Header -->
+                    <div class="bg-gray-900 text-white p-6">
+                        <h2 class="text-2xl font-bold">${business.businessName}</h2>
+                        <p class="mt-1 opacity-90">EIN: ${business.ein}</p>
+                    </div>
+                    
+                    <!-- Risk Overview -->
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold mb-4">Risk Assessment</h3>
+                        <div class="flex items-center gap-8">
+                            <div class="text-center">
+                                <div class="text-4xl font-bold ${risk.risk_level === 'HIGH' ? 'text-red-600' : risk.risk_level === 'MEDIUM' ? 'text-yellow-600' : 'text-green-600'}">
+                                    ${risk.risk_score}
+                                </div>
+                                <p class="text-sm text-gray-600">Risk Score</p>
+                            </div>
+                            <div class="flex-1">
+                                <div class="bg-gray-200 rounded-full h-4 mb-2">
+                                    <div class="h-4 rounded-full ${risk.risk_level === 'HIGH' ? 'bg-red-500' : risk.risk_level === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'}" 
+                                         style="width: ${risk.risk_score}%"></div>
+                                </div>
+                                <p class="text-sm font-medium">${risk.risk_level} RISK</p>
+                            </div>
+                        </div>
+                        ${risk.recommendations && risk.recommendations.length > 0 ? `
+                            <div class="mt-4">
+                                <p class="font-medium text-sm mb-2">Recommendations:</p>
+                                <ul class="list-disc list-inside text-sm text-gray-600">
+                                    ${risk.recommendations.map(r => `<li>${r}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Financial Summary -->
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-4">Financial Summary</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            <div>
+                                <p class="text-sm text-gray-600">Latest Revenue</p>
+                                <p class="text-2xl font-bold">${formatCurrency(data.gross_receipts)}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Operating Income</p>
+                                <p class="text-2xl font-bold ${(data.ordinary_income_loss || 0) < 0 ? 'text-red-600' : 'text-green-600'}">
+                                    ${formatCurrency(data.ordinary_income_loss)}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Recommended Credit Limit</p>
+                                <p class="text-2xl font-bold">${formatCurrency(Math.min((data.gross_receipts || 0) * 0.1, 500000))}</p>
+                            </div>
+                        </div>
+                        
+                        ${historicalData.length > 1 ? `
+                            <div class="mt-6">
+                                <h4 class="font-medium mb-3">Revenue Trend</h4>
+                                <div class="bg-gray-50 p-4 rounded">
+                                    ${historicalData.sort((a, b) => b.year - a.year).slice(0, 3).map(d => `
+                                        <div class="flex justify-between py-1">
+                                            <span class="text-sm text-gray-600">${d.year}:</span>
+                                            <span class="font-medium">${formatCurrency(d.revenue)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="p-6 bg-gray-50">
+                        <h3 class="text-lg font-semibold mb-4">Key Business Metrics</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded">
+                                <p class="text-sm text-gray-600">Total Assets</p>
+                                <p class="font-semibold">${formatCurrency(data.total_assets_eoy)}</p>
+                            </div>
+                            <div class="bg-white p-4 rounded">
+                                <p class="text-sm text-gray-600">Debt Ratio</p>
+                                <p class="font-semibold">${data.debt_to_asset_ratio ? (data.debt_to_asset_ratio * 100).toFixed(1) + '%' : 'N/A'}</p>
+                            </div>
+                            <div class="bg-white p-4 rounded">
+                                <p class="text-sm text-gray-600">Gross Margin</p>
+                                <p class="font-semibold">${data.gross_margin_percent ? data.gross_margin_percent.toFixed(1) + '%' : 'N/A'}</p>
+                            </div>
+                            <div class="bg-white p-4 rounded">
+                                <p class="text-sm text-gray-600">Est. Tax Exposure</p>
+                                <p class="font-semibold">${formatCurrency(risk.estimated_tax_exposure?.total_estimate || 0)}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="p-6 border-t text-center">
+                        <button onclick="this.closest('.fixed').remove()" class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = modalHTML;
+            document.body.appendChild(modal);
+        }
+        
+        // Admin view - can see transcript details
+        function showAdminBusinessDetails(business) {
             let detailsHTML = `
                 <h3 class="text-xl font-bold mb-4">${business.businessName}</h3>
                 <p class="text-gray-600 mb-4">EIN: ${business.ein}</p>
@@ -1415,7 +1556,7 @@
                 detailsHTML += `<pre class="bg-gray-100 p-4 rounded overflow-auto text-xs">${JSON.stringify(business, null, 2)}</pre>`;
             }
             
-            // Show in alert for now - in production this would be a modal
+            // Show in modal
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
