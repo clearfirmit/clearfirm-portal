@@ -1,1628 +1,497 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClearFirm Business Intelligence Portal</title>
+    <title>ClearFirm - Business Intelligence Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
     <style>
-        .gradient-text {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* ClearFirm Brand Colors */
+        :root {
+            --clearfirm-black: #1f2937;
+            --clearfirm-gray: #f5f5f5;
+            --clearfirm-green: #6B7B3A;
+            --clearfirm-berry: #3B0404;
+            --clearfirm-salmon: #AA523C;
+            --clearfirm-ocean: #071F52;
+            --clearfirm-sky: #A2B8E7;
+            --clearfirm-eggshell: #F3F0E8;
         }
-        .loading-spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #1f2937;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--clearfirm-green) 0%, var(--clearfirm-ocean) 100%);
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .btn-primary {
+            background-color: var(--clearfirm-green);
+            color: white;
         }
-        .risk-low { background-color: #10b981; }
-        .risk-medium { background-color: #f59e0b; }
-        .risk-high { background-color: #ef4444; }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        
+        .btn-primary:hover {
+            background-color: #5a6a32;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .text-primary {
+            color: var(--clearfirm-green);
         }
-        /* Brand colors based on ClearFirm guidelines */
-        .clearfirm-green { color: #6B7B3A; }
-        .clearfirm-green-bg { background-color: #6B7B3A; }
+        
+        .border-primary {
+            border-color: var(--clearfirm-green);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Main App Container -->
-    <div id="app" class="min-h-screen">
-        <!-- Login Screen -->
-        <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-            <div class="max-w-md w-full">
-                <div class="bg-white shadow-xl rounded-lg p-8">
-                    <div class="text-center mb-8">
-                        <h1 class="text-4xl font-bold gradient-text mb-2">ClearFirm</h1>
-                        <p class="text-gray-600">Business Intelligence Portal</p>
+    <!-- Landing Page -->
+    <div id="landingPage" class="min-h-screen">
+        <nav class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">ClearFirm</h1>
                     </div>
-                    
-                    <form id="loginForm" class="space-y-6">
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                            <input id="email" name="email" type="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                        </div>
-                        
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                            <input id="password" name="password" type="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                        </div>
-                        
-                        <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"></div>
-                        
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
-                            Sign In to Portal
+                    <div class="flex items-center space-x-4">
+                        <button onclick="showLogin()" class="text-gray-600 hover:text-gray-900">Login</button>
+                        <button onclick="showRegister()" class="px-4 py-2 btn-primary rounded-lg">
+                            Get Started
                         </button>
-                    </form>
-                    
-                    <div class="mt-8 text-center">
-                        <div class="text-sm text-gray-600">
-                            <p>Need access? Contact sales@getclearfirm.com</p>
-                        </div>
                     </div>
                 </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="gradient-bg text-white py-20">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h1 class="text-5xl font-bold mb-4">Business Intelligence in Minutes</h1>
+                <p class="text-xl mb-8 opacity-90">Instant verification and risk assessment for any US business</p>
+                <button onclick="showRegister()" class="px-8 py-4 bg-white text-clearfirm-green rounded-lg font-semibold hover:bg-gray-100" style="color: #6B7B3A;">
+                    Start Free Trial
+                </button>
             </div>
         </div>
 
-        <!-- Main Dashboard -->
-        <div id="mainDashboard" class="hidden">
-            <!-- Navigation -->
-            <nav class="bg-white shadow-sm">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between h-16">
-                        <div class="flex items-center">
-                            <h1 class="text-2xl font-bold gradient-text">ClearFirm</h1>
-                        </div>
-                        <div class="flex items-center space-x-4">
-                            <span id="userEmail" class="text-sm text-gray-600"></span>
-                            <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <!-- Tab Navigation -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8">
-                        <button onclick="switchTab('search')" id="searchTab" class="tab-button py-2 px-1 border-b-2 font-medium text-sm">
-                            Business Search
-                        </button>
-                        <button onclick="switchTab('queue')" id="queueTab" class="tab-button py-2 px-1 border-b-2 font-medium text-sm">
-                            My Queue
-                        </button>
-                        <button onclick="switchTab('portfolio')" id="portfolioTab" class="tab-button py-2 px-1 border-b-2 font-medium text-sm">
-                            Portfolio Analytics
-                        </button>
-                        <button onclick="switchTab('admin')" id="adminTab" class="tab-button hidden py-2 px-1 border-b-2 font-medium text-sm">
-                            Admin Portal
-                        </button>
-                    </nav>
+        <!-- Pricing Section -->
+        <div class="py-20">
+            <div class="max-w-7xl mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-12">Simple, Transparent Pricing</h2>
+                <div class="flex justify-center">
+                    <stripe-pricing-table 
+                        pricing-table-id="prctbl_1RefAyEO7oxv5tEyuHc4aizk"
+                        publishable-key="pk_live_51R6JCXEO7oxv5tEybHFEM8hJnaVicOK62bdBxtFSqPa6YwMjvl6V499h2rD1YeYTwkYEyK7nqViPDgg3Yq4FuVMt00dvIhbWei">
+                    </stripe-pricing-table>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Tab Content -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <!-- Search Tab -->
-                <div id="searchContent" class="tab-content">
-                    <div class="bg-white shadow rounded-lg p-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Business Intelligence Search</h2>
-                        
-                        <form id="searchForm" class="space-y-4 mb-8">
-                            <div>
-                                <label for="searchEIN" class="block text-sm font-medium text-gray-700 mb-1">EIN (Employer Identification Number)</label>
-                                <input type="text" id="searchEIN" placeholder="XX-XXXXXXX" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg">
-                            </div>
-                            <div>
-                                <label for="searchBusinessName" class="block text-sm font-medium text-gray-700 mb-1">Business Name (Optional)</label>
-                                <input type="text" id="searchBusinessName" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg">
-                            </div>
-                            
-                            <button type="submit" class="w-full flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                                Search Business
-                            </button>
-                        </form>
-                        
-                        <div id="searchResults" class="hidden">
-                            <!-- Search results will be populated here -->
-                        </div>
-                        
-                        <!-- Sample Businesses -->
-                        <div class="mt-12">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Sample Businesses Available</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="sampleBusinesses">
-                                <!-- Sample businesses will be populated here -->
-                            </div>
-                        </div>
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-6">Login to ClearFirm</h2>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-clearfirm-green" style="border-color: #e5e7eb;">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-clearfirm-green" style="border-color: #e5e7eb;">
+                </div>
+                <button type="submit" class="w-full py-3 btn-primary text-white rounded-lg">
+                    Login
+                </button>
+            </form>
+            <button onclick="hideLogin()" class="mt-4 text-gray-600 hover:text-gray-800">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-6">Create Your Account</h2>
+            <form id="registerForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Company Name</label>
+                    <input type="text" id="companyName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-clearfirm-green" style="border-color: #e5e7eb;">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="registerEmail" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-clearfirm-green" style="border-color: #e5e7eb;">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="registerPassword" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-clearfirm-green" style="border-color: #e5e7eb;">
+                </div>
+                <button type="submit" class="w-full py-3 btn-primary text-white rounded-lg">
+                    Create Account
+                </button>
+            </form>
+            <button onclick="hideRegister()" class="mt-4 text-gray-600 hover:text-gray-800">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden min-h-screen">
+        <nav class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">ClearFirm</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="creditsDisplay" class="text-sm text-gray-600"></span>
+                        <span id="userEmail" class="text-sm text-gray-600"></span>
+                        <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
                     </div>
                 </div>
+            </div>
+        </nav>
 
-                <!-- Queue Tab -->
-                <div id="queueContent" class="tab-content hidden">
-                    <div class="bg-white shadow rounded-lg p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-6">Verification Queue</h2>
-                        <div id="queueList" class="space-y-4"></div>
-                    </div>
-                </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Subscription Alert -->
+            <div id="subscriptionAlert" class="hidden mb-6 bg-clearfirm-salmon border border-clearfirm-salmon rounded-lg p-4" style="background-color: #FFF5F3; border-color: #AA523C;">
+                <p style="color: #AA523C;">You need an active subscription to make verification requests.</p>
+                <button onclick="showPricing()" class="mt-2 px-4 py-2 text-white rounded" style="background-color: #AA523C;">
+                    View Plans
+                </button>
+            </div>
 
-                <!-- Portfolio Tab -->
-                <div id="portfolioContent" class="tab-content hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-sm font-medium text-gray-500">Total Businesses</h3>
-                            <p class="text-3xl font-bold text-gray-900 mt-2" id="totalBusinesses">0</p>
+            <!-- Search Section -->
+            <div class="bg-white shadow rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-bold mb-4">Verify a Business</h2>
+                <form id="verifyForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">EIN</label>
+                            <input type="text" id="verifyEin" required placeholder="XX-XXXXXXX" 
+                                   class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-clearfirm-green" style="border-color: #e5e7eb;">
                         </div>
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-sm font-medium text-gray-500">Average Risk Score</h3>
-                            <p class="text-3xl font-bold text-gray-900 mt-2" id="avgRiskScore">0</p>
-                        </div>
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-sm font-medium text-gray-500">High Risk Count</h3>
-                            <p class="text-3xl font-bold text-red-600 mt-2" id="highRiskCount">0</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
+                            <input type="text" id="verifyBusinessName" required 
+                                   class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-clearfirm-green" style="border-color: #e5e7eb;">
                         </div>
                     </div>
-                    
-                    <div class="bg-white shadow rounded-lg p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-6">Portfolio Overview</h2>
-                        <div id="portfolioList" class="space-y-4"></div>
-                    </div>
-                </div>
+                    <button type="submit" class="w-full md:w-auto px-6 py-3 btn-primary text-white rounded-lg">
+                        Request Verification
+                    </button>
+                </form>
+            </div>
 
-                <!-- Admin Tab -->
-                <div id="adminContent" class="tab-content hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Upload Form -->
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload Tax Transcript Data</h3>
-                            
-                            <form id="uploadForm" class="space-y-4">
-                                <div>
-                                    <label for="ein" class="block text-sm font-medium text-gray-700">EIN</label>
-                                    <input type="text" id="ein" name="ein" placeholder="XX-XXXXXXX" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
-                                    <input type="text" id="businessName" name="businessName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
-                                
-                                <div class="space-y-2">
-                                    <label class="block text-sm font-medium text-gray-700">Upload HTML Transcript Files</label>
-                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                                        <div class="space-y-1 text-center">
-                                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                            </svg>
-                                            <div class="flex text-sm text-gray-600">
-                                                <label for="htmlFiles" class="relative cursor-pointer bg-white rounded-md font-medium text-gray-900 hover:text-gray-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-gray-500">
-                                                    <span>Upload files</span>
-                                                    <input id="htmlFiles" name="htmlFiles" type="file" class="sr-only" multiple accept=".html,.htm">
-                                                </label>
-                                                <p class="pl-1">or drag and drop</p>
-                                            </div>
-                                            <p class="text-xs text-gray-500">HTML files up to 10MB</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                    Process Transcript Data
-                                </button>
-                            </form>
-                        </div>
-                        
-                        <!-- Data Extraction Preview -->
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Data Extraction Preview</h3>
-                            <div id="extractionPreview" class="space-y-4">
-                                <p class="text-sm text-gray-600">Upload HTML files to see extracted data fields</p>
-                                
-                                <div class="hidden" id="extractedFields">
-                                    <div class="mb-4">
-                                        <h4 class="font-medium text-sm mb-2">Basic Information:</h4>
-                                        <div class="bg-gray-50 p-3 rounded text-xs space-y-1" id="basicInfo"></div>
-                                    </div>
-                                    
-                                    <div class="mb-4">
-                                        <h4 class="font-medium text-sm mb-2">Financial Metrics:</h4>
-                                        <div class="bg-gray-50 p-3 rounded text-xs space-y-1" id="financialMetrics"></div>
-                                    </div>
-                                    
-                                    <div class="mb-4">
-                                        <h4 class="font-medium text-sm mb-2">Risk Assessment:</h4>
-                                        <div class="bg-gray-50 p-3 rounded" id="riskAssessment"></div>
-                                    </div>
-                                    
-                                    <div class="mt-4">
-                                        <button onclick="saveBusinessProfile()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 text-sm">
-                                            Save Business Profile
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Processing Queue -->
-                    <div class="mt-6 bg-white shadow rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Admin Processing Queue</h3>
-                        <div id="adminQueue" class="space-y-2"></div>
-                    </div>
+            <!-- Requests List -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Your Verification Requests</h2>
+                <div id="requestsList" class="space-y-4">
+                    <!-- Requests will be populated here -->
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Tax Transcript Parser Class (integrated from Python)
-        class TaxTranscriptParser {
-            constructor() {
-                this.fieldMappings = {
-                    "1120S": {
-                        "GROSS RECEIPTS": "gross_receipts",
-                        "COST OF GOODS SOLD": "cost_of_goods_sold",
-                        "TOTAL INCOME": "total_income",
-                        "ORDINARY INCOME/LOSS": "ordinary_income_loss",
-                        "ORDINARY BUSINESS INCOME (LOSS)": "ordinary_income_loss",
-                        "COMPENSATION OF OFFICERS": "officer_compensation",
-                        "SALARIES AND WAGES": "wages",
-                        "SALARY & WAGES LESS JOBS CREDIT": "wages",
-                        "TAXES & LICENSES": "taxes_licenses",
-                        "TAXES AND LICENSES": "taxes_licenses",
-                        "INTEREST": "interest_expense",
-                        "DEPRECIATION (NET)": "depreciation",
-                        "DEPRECIATION": "depreciation",
-                        "EMPLOYEE BENEFIT PROGRAMS": "employee_benefits",
-                        "PENSION/PROFIT SHARE PLANS": "pension_plans",
-                        "OTHER DEDUCTIONS": "other_deductions",
-                        "TOTAL DEDUCTIONS": "total_deductions",
-                        "TOTAL ASSETS (END)": "total_assets_eoy",
-                        "TOTAL ASSETS": "total_assets_eoy",
-                        "LOANS FROM SHAREHOLDERS END OF YEAR": "loans_from_shareholders",
-                        "LOANS FROM SHAREHOLDERS": "loans_from_shareholders",
-                        "RETAINED EARNINGS END OF YEAR": "retained_earnings_eoy",
-                        "RETAINED EARNINGS": "retained_earnings_eoy",
-                        "CAPITAL STOCK END OF YEAR": "capital_stock",
-                        "CAPITAL STOCK": "capital_stock",
-                        "NUMBER OF SHAREHOLDERS": "num_shareholders",
-                        "TAX YEAR BEGINNING": "tax_year_start",
-                        "RECEIVED DATE": "return_received_date"
-                    },
-                    "1120": {
-                        "GROSS RECEIPTS OR SALES": "gross_receipts",
-                        "GROSS RECEIPTS": "gross_receipts",
-                        "TAXABLE INCOME": "taxable_income",
-                        "TOTAL TAX": "total_tax",
-                        "ORDINARY BUSINESS INCOME (LOSS)": "ordinary_income_loss",
-                        "NET INCOME (LOSS)": "ordinary_income_loss"
-                    },
-                    "1065": {
-                        "GROSS RECEIPTS OR SALES": "gross_receipts",
-                        "GROSS RECEIPTS": "gross_receipts",
-                        "ORDINARY INCOME (LOSS)": "ordinary_income_loss",
-                        "ORDINARY BUSINESS INCOME (LOSS)": "ordinary_income_loss"
-                    }
-                };
-            }
+        // API configuration
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001/api' 
+            : 'https://your-api-domain.com/api';
+        
+        const stripe = Stripe('pk_live_51R6JCXEO7oxv5tEybHFEM8hJnaVicOK62bdBxtFSqPa6YwMjvl6V499h2rD1YeYTwkYEyK7nqViPDgg3Yq4FuVMt00dvIhbWei');
+        
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
 
-            async parseTranscriptHTML(htmlContent) {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlContent, 'text/html');
-                
-                let transcriptData = this.extractBasicInfo(doc);
-                const formType = transcriptData.form_type || "";
-                
-                if (this.fieldMappings[formType]) {
-                    const financialData = this.extractFinancialData(doc, formType);
-                    Object.assign(transcriptData, financialData);
-                }
-                
-                const additionalContext = this.extractAdditionalContext(doc);
-                Object.assign(transcriptData, additionalContext);
-                
-                const derivedMetrics = this.calculateDerivedMetrics(transcriptData);
-                Object.assign(transcriptData, derivedMetrics);
-                
-                console.log('Parsed transcript data:', transcriptData);
-                return transcriptData;
-            }
+        // Check authentication on load
+        if (authToken) {
+            checkAuth();
+        }
 
-            extractBasicInfo(doc) {
-                const data = {};
-                
-                // First, try to find EIN in the entire document
-                const bodyText = doc.body.textContent;
-                const einPattern = /\b\d{2}-\d{7}\b/g;
-                const einMatches = bodyText.match(einPattern);
-                if (einMatches && einMatches.length > 0) {
-                    // Take the first valid EIN found
-                    data.ein = einMatches[0];
-                    console.log('Found EIN:', data.ein);
-                }
-                
-                // Extract form type - look for specific form patterns
-                const formTypePattern = /Form\s+(1120S?|1065|1040|990|941|940)\b/i;
-                const formMatch = bodyText.match(formTypePattern);
-                if (formMatch) {
-                    data.form_type = formMatch[1].toUpperCase();
-                    console.log('Found form type:', data.form_type);
-                } else {
-                    // Try alternative patterns
-                    if (bodyText.includes("S CORPORATION")) {
-                        data.form_type = "1120S";
-                    } else if (bodyText.includes("C CORPORATION")) {
-                        data.form_type = "1120";
-                    } else if (bodyText.includes("PARTNERSHIP")) {
-                        data.form_type = "1065";
-                    }
-                }
-                
-                // Extract tax period - look for date patterns
-                const taxPeriodPattern = /Tax Period[:\s]+([A-Za-z]+\.?\s+\d{1,2},?\s+\d{4})/i;
-                const periodMatch = bodyText.match(taxPeriodPattern);
-                if (periodMatch) {
-                    data.tax_period_formatted = periodMatch[1];
-                    // Extract year for sorting
-                    const yearMatch = periodMatch[1].match(/\d{4}/);
-                    if (yearMatch) {
-                        const monthMatch = periodMatch[1].match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
-                        if (monthMatch) {
-                            const monthMap = {
-                                'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
-                                'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-                                'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
-                            };
-                            data.tax_period = yearMatch[0] + monthMap[monthMatch[0].substring(0, 3)];
-                        }
-                    }
-                } else {
-                    // Try to find year-end date
-                    const yearEndPattern = /Year End[:\s]+(\d{2}\/\d{2}\/\d{4})/i;
-                    const yearEndMatch = bodyText.match(yearEndPattern);
-                    if (yearEndMatch) {
-                        const dateParts = yearEndMatch[1].split('/');
-                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        data.tax_period_formatted = `${monthNames[parseInt(dateParts[0]) - 1]}. ${dateParts[1]}, 20${dateParts[2]}`;
-                        data.tax_period = `20${dateParts[2]}${dateParts[0].padStart(2, '0')}`;
-                    }
-                }
-                
-                // Extract business name - look for specific patterns
-                const namePattern = /Business Name[:\s]+([^\n]+)/i;
-                const nameMatch = bodyText.match(namePattern);
-                if (nameMatch) {
-                    data.business_name = nameMatch[1].trim();
-                }
-                
-                // Try to extract from title if available
-                const title = doc.querySelector('title');
-                if (title && title.textContent) {
-                    const titleText = title.textContent.trim();
-                    
-                    // If we didn't find EIN yet, try title
-                    if (!data.ein) {
-                        const titleEinMatch = titleText.match(einPattern);
-                        if (titleEinMatch) {
-                            data.ein = titleEinMatch[0];
-                        }
-                    }
-                    
-                    // Extract additional info from title
-                    if (!data.form_type) {
-                        const titleFormMatch = titleText.match(/\b(1120S?|1065|1040|990|941|940)\b/);
-                        if (titleFormMatch) {
-                            data.form_type = titleFormMatch[0];
-                        }
-                    }
-                }
-                
-                // Extract from table rows as fallback
-                const rows = doc.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 2) {
-                        const label = cells[0].textContent.trim().toUpperCase();
-                        const value = cells[1].textContent.trim();
-                        
-                        if (!data.ein && (label.includes("EIN") || label.includes("EMPLOYER IDENTIFICATION"))) {
-                            const einMatch = value.match(einPattern);
-                            if (einMatch) {
-                                data.ein = einMatch[0];
-                            }
-                        }
-                        
-                        if (!data.business_name && label.includes("NAME") && (label.includes("SHOWN") || label.includes("BUSINESS"))) {
-                            data.business_name = value;
-                        }
-                        
-                        if (!data.tax_period_formatted && (label.includes("TAX PERIOD") || label.includes("YEAR END"))) {
-                            data.tax_period_formatted = value;
-                        }
+        // Authentication functions
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_URL}/auth/verify`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
                     }
                 });
                 
-                return data;
+                if (response.ok) {
+                    showDashboard();
+                    loadUserData();
+                } else {
+                    authToken = null;
+                    localStorage.removeItem('authToken');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
             }
+        }
 
-            extractFinancialData(doc, formType) {
-                const data = {};
-                const fieldMap = this.fieldMappings[formType] || {};
-                
-                const rows = doc.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 2) {
-                        const label = cells[0].textContent.trim().replace(':', '').toUpperCase();
-                        const valueText = cells[1].textContent.trim();
-                        
-                        // Direct field mapping
-                        for (const [transcriptField, dataField] of Object.entries(fieldMap)) {
-                            if (label === transcriptField || label.includes(transcriptField)) {
-                                const value = this.parseValue(valueText);
-                                if (value !== null) {
-                                    data[dataField] = value;
-                                }
-                                break;
-                            }
-                        }
-                        
-                        // Also check for common variations
-                        if (label.includes("GROSS RECEIPTS") || label.includes("TOTAL RECEIPTS")) {
-                            const value = this.parseValue(valueText);
-                            if (value !== null) data.gross_receipts = value;
-                        }
-                        else if (label.includes("ORDINARY BUSINESS INCOME") || label.includes("ORDINARY INCOME")) {
-                            const value = this.parseValue(valueText);
-                            if (value !== null) data.ordinary_income_loss = value;
-                        }
-                        else if (label.includes("TOTAL ASSETS") && label.includes("END")) {
-                            const value = this.parseValue(valueText);
-                            if (value !== null) data.total_assets_eoy = value;
-                        }
-                        else if (label.includes("SALARIES") || label.includes("WAGES")) {
-                            const value = this.parseValue(valueText);
-                            if (value !== null && !data.wages) data.wages = value;
-                        }
-                    }
+        async function login(email, password) {
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
                 });
                 
-                return data;
-            }
-
-            parseValue(valueText) {
-                if (!valueText || valueText === "N/A") {
-                    return null;
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    hideLogin();
+                    showDashboard();
+                    loadUserData();
+                } else {
+                    alert('Invalid credentials');
                 }
-                
-                let cleaned = valueText.replace(/[$,]/g, '').trim();
-                
-                // Handle negative values in parentheses
-                if (cleaned.startsWith('(') && cleaned.endsWith(')')) {
-                    cleaned = '-' + cleaned.slice(1, -1);
-                }
-                
-                try {
-                    return parseFloat(cleaned);
-                } catch (e) {
-                    try {
-                        return parseInt(cleaned);
-                    } catch (e2) {
-                        return null;
-                    }
-                }
-            }
-
-            extractAdditionalContext(doc) {
-                const context = {};
-                const textContent = doc.body.textContent;
-                
-                if (textContent.includes("Amendment") || textContent.includes("AMENDED RETURN")) {
-                    context.has_amendments = true;
-                }
-                
-                if (textContent.includes("ESTIMATED TAX PENALTY")) {
-                    const rows = doc.querySelectorAll('tr');
-                    rows.forEach(row => {
-                        if (row.textContent.includes("ESTIMATED TAX PENALTY")) {
-                            const cells = row.querySelectorAll('td');
-                            if (cells.length >= 2) {
-                                const penalty = this.parseValue(cells[1].textContent);
-                                if (penalty && penalty > 0) {
-                                    context.estimated_tax_penalty = penalty;
-                                }
-                            }
-                        }
-                    });
-                }
-                
-                return context;
-            }
-
-            calculateDerivedMetrics(data) {
-                const metrics = {};
-                
-                if (data.gross_receipts && data.cost_of_goods_sold) {
-                    const grossProfit = data.gross_receipts - data.cost_of_goods_sold;
-                    metrics.gross_margin_percent = (grossProfit / data.gross_receipts) * 100;
-                }
-                
-                if (data.gross_receipts && data.ordinary_income_loss) {
-                    metrics.operating_margin_percent = (data.ordinary_income_loss / data.gross_receipts) * 100;
-                }
-                
-                if (data.loans_from_shareholders && data.total_assets_eoy) {
-                    metrics.debt_to_asset_ratio = data.loans_from_shareholders / data.total_assets_eoy;
-                }
-                
-                const wages = data.wages || 0;
-                const officerComp = data.officer_compensation || 0;
-                const benefits = data.employee_benefits || 0;
-                const pension = data.pension_plans || 0;
-                
-                metrics.total_employment_costs = wages + officerComp + benefits + pension;
-                
-                if (metrics.total_employment_costs > 0) {
-                    metrics.estimated_quarterly_941 = metrics.total_employment_costs * 0.153 / 4;
-                }
-                
-                return metrics;
-            }
-
-            generateRiskAssessment(transcriptData) {
-                const riskFactors = [];
-                let riskScore = 0;
-                const recommendations = [];
-                
-                if ((transcriptData.ordinary_income_loss || 0) < 0) {
-                    riskFactors.push("Operating at a loss");
-                    riskScore += 20;
-                }
-                
-                if ((transcriptData.total_employment_costs || 0) > 100000 && (transcriptData.ordinary_income_loss || 0) < 0) {
-                    riskFactors.push("High payroll costs with operating losses");
-                    riskScore += 25;
-                    recommendations.push("941/940 Payroll Tax Resolution");
-                }
-                
-                if ((transcriptData.debt_to_asset_ratio || 0) > 0.7) {
-                    riskFactors.push("High debt-to-asset ratio");
-                    riskScore += 10;
-                }
-                
-                if ((transcriptData.retained_earnings_eoy || 0) < -100000) {
-                    riskFactors.push("Significant negative retained earnings");
-                    riskScore += 15;
-                    recommendations.push("Business tax debt resolution");
-                }
-                
-                if (transcriptData.gross_receipts && transcriptData.interest_expense) {
-                    const interestBurden = (transcriptData.interest_expense / transcriptData.gross_receipts) * 100;
-                    if (interestBurden > 5) {
-                        riskFactors.push(`Interest expense is ${interestBurden.toFixed(1)}% of revenue`);
-                        riskScore += 10;
-                    }
-                }
-                
-                riskScore = Math.min(riskScore, 100);
-                
-                let riskLevel = "LOW";
-                if (riskScore >= 70) riskLevel = "HIGH";
-                else if (riskScore >= 40) riskLevel = "MEDIUM";
-                
-                // Estimate tax exposure
-                let payrollTaxEstimate = 0;
-                if (transcriptData.total_employment_costs && (transcriptData.ordinary_income_loss || 0) < 0) {
-                    const quarterly941 = transcriptData.total_employment_costs * 0.153 / 4;
-                    payrollTaxEstimate = quarterly941 * 2;
-                }
-                
-                let incomeTaxEstimate = 0;
-                if (transcriptData.form_type === "1120" && (transcriptData.total_tax || 0) > 0) {
-                    incomeTaxEstimate = transcriptData.total_tax;
-                }
-                
-                return {
-                    risk_score: riskScore,
-                    risk_level: riskLevel,
-                    risk_factors: riskFactors,
-                    recommendations: recommendations,
-                    estimated_tax_exposure: {
-                        payroll_tax_estimate: payrollTaxEstimate,
-                        income_tax_estimate: incomeTaxEstimate,
-                        total_estimate: payrollTaxEstimate + incomeTaxEstimate
-                    }
-                };
+            } catch (error) {
+                alert('Login failed. Please try again.');
             }
         }
 
-        // Initialize parser
-        const parser = new TaxTranscriptParser();
-
-        // Application State
-        const state = {
-            currentUser: null,
-            businesses: [],
-            queue: [],
-            transcriptData: null,
-            uploadedTranscripts: []
-        };
-
-        // Demo Data
-        const users = {
-            'affiniti@clearfirm.com': { password: 'demo123', role: 'client', name: 'Affiniti Finance' },
-            'matt@getclearfirm.com': { password: 'admin123', role: 'admin', name: 'Matt Parker' }
-        };
-
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if logged in
-            const savedUser = localStorage.getItem('clearfirm_user');
-            if (savedUser) {
-                state.currentUser = JSON.parse(savedUser);
-                showDashboard();
-            }
-            
-            // Setup form handlers
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('searchForm').addEventListener('submit', handleSearch);
-            document.getElementById('uploadForm').addEventListener('submit', handleUpload);
-            
-            // Setup file upload
-            const fileInput = document.getElementById('htmlFiles');
-            fileInput.addEventListener('change', handleFileSelect);
-            
-            // Setup drag and drop
-            const dropZone = document.querySelector('.border-dashed');
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('border-gray-400', 'bg-gray-50');
-            });
-            
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('border-gray-400', 'bg-gray-50');
-            });
-            
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('border-gray-400', 'bg-gray-50');
-                handleFileSelect({ target: { files: e.dataTransfer.files } });
-            });
-        });
-
-        // Login Handler
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (users[email] && users[email].password === password) {
-                state.currentUser = { email, ...users[email] };
-                localStorage.setItem('clearfirm_user', JSON.stringify(state.currentUser));
-                showDashboard();
-            } else {
-                document.getElementById('loginError').textContent = 'Invalid email or password';
-                document.getElementById('loginError').classList.remove('hidden');
+        async function register(companyName, email, password) {
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ companyName, email, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    hideRegister();
+                    showDashboard();
+                    showPricing(); // Show pricing after registration
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Registration failed');
+                }
+            } catch (error) {
+                alert('Registration failed. Please try again.');
             }
         }
 
-        // Show Dashboard
+        // UI functions
+        function showLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function hideLogin() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('registerModal').classList.remove('hidden');
+        }
+
+        function hideRegister() {
+            document.getElementById('registerModal').classList.add('hidden');
+        }
+
         function showDashboard() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainDashboard').classList.remove('hidden');
-            document.getElementById('userEmail').textContent = state.currentUser.email;
-            
-            // Show admin tab if admin user
-            if (state.currentUser.role === 'admin') {
-                document.getElementById('adminTab').classList.remove('hidden');
-            }
-            
-            // Load data
-            loadBusinesses();
-            loadQueue();
-            
-            // Display sample businesses for customers
-            if (state.currentUser.role !== 'admin') {
-                displaySampleBusinesses();
-            }
-            
-            switchTab('search');
-        }
-        
-        // Display sample businesses
-        function displaySampleBusinesses() {
-            const sampleBusinesses = [
-                { name: 'Star Discount Pharmacy', ein: 'XX-XXX2375', risk: 'LOW' },
-                { name: 'MANA GROUP PHARMACIES LLC', ein: 'XX-XXX9460', risk: 'HIGH' },
-                { name: 'D&B Pharmacy Corporation', ein: 'XX-XXX4555', risk: 'MEDIUM' }
-            ];
-            
-            const container = document.getElementById('sampleBusinesses');
-            if (container) {
-                container.innerHTML = sampleBusinesses.map(biz => `
-                    <div class="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" 
-                         onclick="document.getElementById('searchEIN').value='${biz.ein}'; document.getElementById('searchBusinessName').value='${biz.name}';">
-                        <h4 class="font-medium text-gray-900">${biz.name}</h4>
-                        <p class="text-sm text-gray-600 mt-1">EIN: ${biz.ein}</p>
-                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                            biz.risk === 'HIGH' ? 'bg-red-100 text-red-800' : 
-                            biz.risk === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
-                            'bg-green-100 text-green-800'
-                        }">
-                            ${biz.risk} RISK
-                        </span>
-                    </div>
-                `).join('');
-            }
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
         }
 
-        // Tab Switching
-        function switchTab(tab) {
-            // Hide all content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            // Reset tab styles
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('border-gray-900', 'text-gray-900');
-                button.classList.add('border-transparent', 'text-gray-500');
-            });
-            
-            // Show selected content
-            document.getElementById(`${tab}Content`).classList.remove('hidden');
-            document.getElementById(`${tab}Tab`).classList.remove('border-transparent', 'text-gray-500');
-            document.getElementById(`${tab}Tab`).classList.add('border-gray-900', 'text-gray-900');
-            
-            // Load tab-specific data
-            if (tab === 'portfolio') {
-                updatePortfolio();
-            } else if (tab === 'admin') {
-                updateAdminQueue();
-            }
-        }
-
-        // Business Search
-        function handleSearch(e) {
-            e.preventDefault();
-            const ein = document.getElementById('searchEIN').value.trim();
-            const businessName = document.getElementById('searchBusinessName').value.trim();
-            
-            if (!ein) {
-                alert('Please enter an EIN to search');
-                return;
-            }
-            
-            // Find business in our database
-            const business = state.businesses.find(b => 
-                b.ein && b.ein.trim().toUpperCase() === ein.trim().toUpperCase()
-            );
-            
-            const resultsDiv = document.getElementById('searchResults');
-            resultsDiv.classList.remove('hidden');
-            
-            if (business && business.transcripts && business.transcripts.length > 0) {
-                // Business found - show detailed analysis
-                resultsDiv.innerHTML = generateBusinessAnalysisCard(business);
-            } else {
-                // Not found - add to queue
-                const request = {
-                    id: Date.now(),
-                    ein,
-                    businessName,
-                    status: 'pending',
-                    requestedBy: state.currentUser.email,
-                    requestedAt: new Date().toISOString()
-                };
-                
-                state.queue.push(request);
-                saveQueue();
-                
-                resultsDiv.innerHTML = `
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                        <p class="text-yellow-800">Business not found in our database.</p>
-                        <p class="text-sm text-yellow-600 mt-1">Verification request submitted. You'll receive the results within 30 minutes to 1 business day.</p>
-                    </div>
-                `;
-            }
-            
-            document.getElementById('searchForm').reset();
-        }
-        
-        // Generate business analysis card (customer view)
-        function generateBusinessAnalysisCard(business) {
-            const latestTranscript = business.transcripts[business.transcripts.length - 1];
-            const data = latestTranscript.data;
-            const risk = latestTranscript.riskAssessment || business.riskAssessment;
-            
-            // Get previous year transcript for YoY comparison
-            const prevYearTranscript = business.transcripts.find(t => 
-                t.data.tax_period && t.data.tax_period.substring(0, 4) === 
-                (parseInt(data.tax_period.substring(0, 4)) - 1).toString()
-            );
-            
-            const prevData = prevYearTranscript ? prevYearTranscript.data : null;
-            
-            // Calculate YoY changes
-            const revenueYoY = prevData && prevData.gross_receipts && data.gross_receipts ? 
-                ((data.gross_receipts - prevData.gross_receipts) / prevData.gross_receipts * 100).toFixed(1) : null;
-            
-            const incomeYoY = prevData && prevData.ordinary_income_loss && data.ordinary_income_loss ? 
-                ((data.ordinary_income_loss - prevData.ordinary_income_loss) / Math.abs(prevData.ordinary_income_loss) * 100).toFixed(1) : null;
-            
-            // Risk badge color
-            const riskColor = risk.risk_level === 'HIGH' ? 'bg-red-100 text-red-800' : 
-                             risk.risk_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
-                             'bg-green-100 text-green-800';
-            
-            return `
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <!-- Header -->
-                    <div class="p-6 border-b">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-900">${business.businessName}</h3>
-                                <p class="text-gray-600 mt-1">EIN: ${business.ein} • ${data.form_type === '1120S' ? 'S Corporation' : data.form_type === '1120' ? 'C Corporation' : 'Corporation'}</p>
-                            </div>
-                            <span class="px-4 py-2 rounded-full text-sm font-semibold ${riskColor}">
-                                ${risk.risk_level} RISK
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <!-- Key Metrics -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gray-50">
-                        <div>
-                            <p class="text-sm text-gray-600">Risk Score</p>
-                            <p class="text-2xl font-bold text-gray-900">${risk.risk_score}/100</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">${data.tax_period ? data.tax_period.substring(0, 4) : 'Latest'} Revenue</p>
-                            <p class="text-2xl font-bold text-gray-900">${formatCurrency(data.gross_receipts)}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Credit Limit</p>
-                            <p class="text-2xl font-bold text-gray-900">${formatCurrency(Math.min(data.gross_receipts * 0.1, 500000))}</p>
-                        </div>
-                        <div>
-                            <button onclick="showBusinessDetails('${business.id}')" class="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-                                View Full Analysis
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Risk Factors -->
-                    ${risk.risk_factors.length > 0 ? `
-                        <div class="p-6 border-t">
-                            ${risk.risk_factors.map(factor => `
-                                <div class="flex items-start mb-3">
-                                    <span class="text-yellow-500 mr-2">⚠️</span>
-                                    <span class="text-gray-700">${factor}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : `
-                        <div class="p-6 border-t">
-                            <div class="flex items-start mb-3">
-                                <span class="text-green-500 mr-2">✓</span>
-                                <span class="text-gray-700">Active Operations</span>
-                            </div>
-                            <div class="flex items-start mb-3">
-                                <span class="text-blue-500 mr-2">ℹ️</span>
-                                <span class="text-gray-700">Properly registered</span>
-                            </div>
-                        </div>
-                    `}
-                    
-                    <!-- Financial Analysis -->
-                    <div class="p-6 bg-white">
-                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Financial Analysis</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Revenue Trends -->
-                            <div>
-                                <h5 class="font-medium text-gray-700 mb-3">Revenue Trends</h5>
-                                ${data.tax_period ? `<p class="text-sm">${data.tax_period.substring(0, 4)}: ${formatCurrency(data.gross_receipts)}</p>` : ''}
-                                ${prevData ? `<p class="text-sm">${prevData.tax_period.substring(0, 4)}: ${formatCurrency(prevData.gross_receipts)}</p>` : ''}
-                                ${revenueYoY ? `<p class="text-sm font-medium ${parseFloat(revenueYoY) >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                    ${parseFloat(revenueYoY) >= 0 ? '+' : ''}${revenueYoY}% YoY
-                                </p>` : ''}
-                            </div>
-                            
-                            <!-- Operating Income -->
-                            <div>
-                                <h5 class="font-medium text-gray-700 mb-3">Operating Income</h5>
-                                ${data.tax_period ? `<p class="text-sm">${data.tax_period.substring(0, 4)}: ${formatCurrency(data.ordinary_income_loss)}</p>` : ''}
-                                ${prevData && prevData.ordinary_income_loss !== undefined ? `<p class="text-sm">${prevData.tax_period.substring(0, 4)}: ${formatCurrency(prevData.ordinary_income_loss)}</p>` : ''}
-                                ${incomeYoY ? `<p class="text-sm font-medium ${parseFloat(incomeYoY) >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                    ${parseFloat(incomeYoY) >= 0 ? '+' : ''}${incomeYoY}% YoY
-                                </p>` : ''}
-                            </div>
-                            
-                            <!-- Asset Metrics -->
-                            <div>
-                                <h5 class="font-medium text-gray-700 mb-3">Asset Metrics</h5>
-                                <p class="text-sm">Total Assets: ${formatCurrency(data.total_assets_eoy)}</p>
-                                <p class="text-sm">Debt-to-Asset Ratio: ${data.debt_to_asset_ratio ? (data.debt_to_asset_ratio * 100).toFixed(1) + '%' : 'N/A'}</p>
-                                <p class="text-sm">Liquidity Score: ${Math.max(20, Math.min(100, 100 - risk.risk_score))}/100</p>
-                            </div>
-                            
-                            <!-- Payroll Compliance -->
-                            <div>
-                                <h5 class="font-medium text-gray-700 mb-3">Payroll Compliance</h5>
-                                <p class="text-sm">Status: <span class="font-medium text-green-600">CURRENT</span></p>
-                                <p class="text-sm">Employees: ${Math.round((data.total_employment_costs || 0) / 50000) || 'N/A'}</p>
-                                <p class="text-sm">Payroll/Revenue: ${data.gross_receipts && data.total_employment_costs ? 
-                                    ((data.total_employment_costs / data.gross_receipts) * 100).toFixed(1) + '%' : 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // File Upload Handling
-        async function handleFileSelect(e) {
-            const files = Array.from(e.target.files);
-            state.uploadedTranscripts = [];
-            
-            for (const file of files) {
-                const content = await file.text();
-                const transcriptData = await parser.parseTranscriptHTML(content);
-                const riskAssessment = parser.generateRiskAssessment(transcriptData);
-                
-                state.uploadedTranscripts.push({
-                    filename: file.name,
-                    data: transcriptData,
-                    riskAssessment
-                });
-            }
-            
-            displayExtractedData();
-        }
-
-        function displayExtractedData() {
-            if (state.uploadedTranscripts.length === 0) return;
-            
-            document.getElementById('extractedFields').classList.remove('hidden');
-            
-            // Display basic info from first transcript
-            const transcript = state.uploadedTranscripts[0];
-            const data = transcript.data;
-            const risk = transcript.riskAssessment;
-            
-            // Basic Information
-            document.getElementById('basicInfo').innerHTML = `
-                <div>Form Type: <strong>${data.form_type || 'N/A'}</strong></div>
-                <div>Tax Period: <strong>${data.tax_period_formatted || data.tax_period || 'N/A'}</strong></div>
-                <div>Business Name: <strong>${data.business_name || 'N/A'}</strong></div>
-                <div>EIN: <strong>${data.ein || 'N/A'}</strong></div>
-                <div>Address: <strong>${data.address || 'N/A'}</strong></div>
-            `;
-            
-            // Financial Metrics
-            document.getElementById('financialMetrics').innerHTML = `
-                <div>Gross Receipts: <strong>${formatCurrency(data.gross_receipts)}</strong></div>
-                <div>Operating Income/Loss: <strong class="${(data.ordinary_income_loss || 0) < 0 ? 'text-red-600' : 'text-green-600'}">${formatCurrency(data.ordinary_income_loss)}</strong></div>
-                <div>Total Assets: <strong>${formatCurrency(data.total_assets_eoy)}</strong></div>
-                <div>Total Employment Costs: <strong>${formatCurrency(data.total_employment_costs)}</strong></div>
-                <div>Gross Margin: <strong>${data.gross_margin_percent ? data.gross_margin_percent.toFixed(1) + '%' : 'N/A'}</strong></div>
-                <div>Operating Margin: <strong>${data.operating_margin_percent ? data.operating_margin_percent.toFixed(1) + '%' : 'N/A'}</strong></div>
-            `;
-            
-            // Risk Assessment
-            const riskClass = risk.risk_level === 'HIGH' ? 'text-red-600' : risk.risk_level === 'MEDIUM' ? 'text-yellow-600' : 'text-green-600';
-            document.getElementById('riskAssessment').innerHTML = `
-                <div class="mb-2">
-                    <span class="text-sm">Risk Score: </span>
-                    <span class="font-bold text-lg ${riskClass}">${risk.risk_score}/100</span>
-                    <span class="ml-2 px-2 py-1 rounded text-xs font-medium ${risk.risk_level === 'HIGH' ? 'bg-red-100 text-red-800' : risk.risk_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                        ${risk.risk_level} RISK
-                    </span>
-                </div>
-                ${risk.risk_factors.length > 0 ? `
-                    <div class="text-xs">
-                        <div class="font-medium mb-1">Risk Factors:</div>
-                        <ul class="list-disc list-inside space-y-1">
-                            ${risk.risk_factors.map(f => `<li>${f}</li>`).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-                <div class="mt-2 text-xs">
-                    <div class="font-medium">Estimated Tax Exposure:</div>
-                    <div>Total: <strong>${formatCurrency(risk.estimated_tax_exposure.total_estimate)}</strong></div>
-                </div>
-            `;
-            
-            // Update form fields if empty
-            if (!document.getElementById('ein').value && data.ein) {
-                document.getElementById('ein').value = data.ein;
-            }
-            if (!document.getElementById('businessName').value && data.business_name) {
-                document.getElementById('businessName').value = data.business_name;
-            }
-        }
-
-        // Handle Upload
-        function handleUpload(e) {
-            e.preventDefault();
-            
-            const ein = document.getElementById('ein').value.trim();
-            const businessName = document.getElementById('businessName').value.trim();
-            
-            if (!ein || !businessName || state.uploadedTranscripts.length === 0) {
-                alert('Please fill in all fields and upload at least one transcript');
-                return;
-            }
-            
-            // Find existing business by EIN (case-insensitive and trim spaces)
-            let business = state.businesses.find(b => 
-                b.ein && b.ein.trim().toUpperCase() === ein.trim().toUpperCase()
-            );
-            
-            if (!business) {
-                // Create new business entry
-                business = {
-                    id: Date.now(),
-                    ein: ein,
-                    businessName: businessName,
-                    transcripts: [],
-                    uploadedBy: state.currentUser.email,
-                    uploadedAt: new Date().toISOString(),
-                    status: 'verified'
-                };
-                state.businesses.push(business);
-                console.log('Created new business:', business);
-            } else {
-                console.log('Found existing business:', business);
-                // Update business name if different
-                if (business.businessName !== businessName) {
-                    business.businessName = businessName;
-                }
-            }
-            
-            // Initialize transcripts array if it doesn't exist
-            if (!business.transcripts) {
-                business.transcripts = [];
-            }
-            
-            // Add transcripts to the business
-            let addedCount = 0;
-            state.uploadedTranscripts.forEach(transcript => {
-                // Check if transcript for this period already exists
-                const existingIndex = business.transcripts.findIndex(t => 
-                    t.data && transcript.data && 
-                    t.data.tax_period === transcript.data.tax_period
-                );
-                
-                if (existingIndex >= 0) {
-                    // Update existing transcript
-                    business.transcripts[existingIndex] = transcript;
-                    console.log('Updated existing transcript for period:', transcript.data.tax_period);
-                } else {
-                    // Add new transcript
-                    business.transcripts.push(transcript);
-                    addedCount++;
-                    console.log('Added new transcript for period:', transcript.data.tax_period);
-                }
-            });
-            
-            // Calculate overall risk assessment based on latest transcript
-            const sortedTranscripts = business.transcripts.sort((a, b) => {
-                const periodA = a.data?.tax_period || '';
-                const periodB = b.data?.tax_period || '';
-                return periodB.localeCompare(periodA);
-            });
-            
-            const latestTranscript = sortedTranscripts[0];
-            
-            if (latestTranscript && latestTranscript.data) {
-                business.riskAssessment = latestTranscript.riskAssessment;
-                // Copy key fields to business level for easy display
-                business.gross_receipts = latestTranscript.data.gross_receipts;
-                business.ordinary_income_loss = latestTranscript.data.ordinary_income_loss;
-                business.tax_period = latestTranscript.data.tax_period;
-                business.tax_period_formatted = latestTranscript.data.tax_period_formatted;
-                business.form_type = latestTranscript.data.form_type;
-            }
-            
-            // Update queue item if exists
-            const queueItem = state.queue.find(q => q.ein === ein);
-            if (queueItem) {
-                queueItem.status = 'completed';
-                queueItem.completedAt = new Date().toISOString();
-            }
-            
-            // Remove any old duplicate entries for this EIN
-            state.businesses = state.businesses.filter(b => 
-                b.id === business.id || b.ein.trim().toUpperCase() !== ein.trim().toUpperCase()
-            );
-            
-            saveBusinesses();
-            saveQueue();
-            
-            // Clear form
-            document.getElementById('uploadForm').reset();
-            document.getElementById('extractedFields').classList.add('hidden');
-            const uploadedCount = state.uploadedTranscripts.length;
-            state.uploadedTranscripts = [];
-            
-            alert(`Successfully processed ${uploadedCount} transcript(s) for ${businessName}.\nTotal transcripts for this business: ${business.transcripts.length}`);
-            updateAdminQueue();
-            
-            // If on portfolio tab, refresh it
-            if (document.getElementById('portfolioContent').classList.contains('hidden') === false) {
-                updatePortfolio();
-            }
-        }
-
-        // Save Business Profile
-        function saveBusinessProfile() {
-            const ein = document.getElementById('ein').value;
-            const businessName = document.getElementById('businessName').value;
-            
-            if (!ein || !businessName || state.uploadedTranscripts.length === 0) {
-                alert('Please complete all fields before saving');
-                return;
-            }
-            
-            handleUpload({ preventDefault: () => {} });
-        }
-
-        // Load Data Functions with error handling
-        function loadBusinesses() {
-            try {
-                const saved = localStorage.getItem('clearfirm_businesses');
-                console.log('Loading businesses, raw data:', saved);
-                if (saved) {
-                    state.businesses = JSON.parse(saved);
-                    console.log('Loaded', state.businesses.length, 'businesses');
-                } else {
-                    state.businesses = [];
-                    console.log('No businesses found in localStorage');
-                }
-            } catch (error) {
-                console.error('Error loading businesses:', error);
-                state.businesses = [];
-            }
-        }
-
-        function loadQueue() {
-            try {
-                const saved = localStorage.getItem('clearfirm_queue');
-                if (saved) {
-                    state.queue = JSON.parse(saved);
-                    console.log('Loaded', state.queue.length, 'queue items');
-                } else {
-                    state.queue = [];
-                }
-            } catch (error) {
-                console.error('Error loading queue:', error);
-                state.queue = [];
-            }
-            updateQueueDisplay();
-        }
-
-        // Save functions with error handling
-        function saveBusinesses() {
-            try {
-                const dataToSave = JSON.stringify(state.businesses);
-                localStorage.setItem('clearfirm_businesses', dataToSave);
-                console.log('Saved businesses:', state.businesses.length, 'businesses');
-                console.log('First business:', state.businesses[0]);
-                
-                // Verify save
-                const saved = localStorage.getItem('clearfirm_businesses');
-                if (!saved) {
-                    console.error('Failed to save businesses!');
-                }
-            } catch (error) {
-                console.error('Error saving businesses:', error);
-                alert('Error saving data: ' + error.message);
-            }
-        }
-
-        function saveQueue() {
-            try {
-                localStorage.setItem('clearfirm_queue', JSON.stringify(state.queue));
-                console.log('Saved queue:', state.queue.length, 'items');
-            } catch (error) {
-                console.error('Error saving queue:', error);
-            }
-        }
-
-        // Update Queue Display
-        function updateQueueDisplay() {
-            const queueList = document.getElementById('queueList');
-            const userQueue = state.queue.filter(q => q.requestedBy === state.currentUser.email);
-            
-            if (userQueue.length === 0) {
-                queueList.innerHTML = '<p class="text-gray-500">No pending verification requests</p>';
-                return;
-            }
-            
-            queueList.innerHTML = userQueue.map(item => `
-                <div class="border rounded-lg p-4 ${item.status === 'completed' ? 'bg-green-50' : 'bg-gray-50'}">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-medium">${item.businessName}</h4>
-                            <p class="text-sm text-gray-600">EIN: ${item.ein}</p>
-                            <p class="text-xs text-gray-500">Requested: ${new Date(item.requestedAt).toLocaleString()}</p>
-                        </div>
-                        <span class="px-2 py-1 text-xs rounded-full ${
-                            item.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                        }">
-                            ${item.status === 'completed' ? 'Completed' : 'Pending'}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Update Portfolio
-        function updatePortfolio() {
-            const verifiedBusinesses = state.businesses.filter(b => b.status === 'verified');
-            
-            // Update stats
-            document.getElementById('totalBusinesses').textContent = verifiedBusinesses.length;
-            
-            if (verifiedBusinesses.length > 0) {
-                const avgRisk = verifiedBusinesses.reduce((sum, b) => sum + (b.riskAssessment?.risk_score || 0), 0) / verifiedBusinesses.length;
-                document.getElementById('avgRiskScore').textContent = avgRisk.toFixed(0);
-                
-                const highRisk = verifiedBusinesses.filter(b => b.riskAssessment?.risk_level === 'HIGH').length;
-                document.getElementById('highRiskCount').textContent = highRisk;
-            }
-            
-            // Update portfolio list
-            const portfolioList = document.getElementById('portfolioList');
-            
-            if (verifiedBusinesses.length === 0) {
-                portfolioList.innerHTML = '<p class="text-gray-500">No verified businesses in your portfolio</p>';
-                return;
-            }
-            
-            // For customers, show the professional cards
-            if (state.currentUser.role !== 'admin') {
-                portfolioList.innerHTML = verifiedBusinesses.map(business => {
-                    return generateBusinessAnalysisCard(business);
-                }).join('');
-            } else {
-                // Admin sees simpler list view
-                portfolioList.innerHTML = verifiedBusinesses.map(business => {
-                    const risk = business.riskAssessment || { risk_level: 'LOW', risk_score: 0 };
-                    const riskColorClass = risk.risk_level === 'HIGH' ? 'bg-red-100 text-red-800' : 
-                                          risk.risk_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
-                                          'bg-green-100 text-green-800';
-                    
-                    const transcriptCount = business.transcripts ? business.transcripts.length : 1;
-                    
-                    return `
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer mb-4" onclick="showBusinessDetails('${business.id}')">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h4 class="font-medium text-lg">${business.businessName}</h4>
-                                    <p class="text-sm text-gray-600">EIN: ${business.ein}</p>
-                                    <p class="text-xs text-gray-500">${transcriptCount} transcript(s) available</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-sm font-medium ${riskColorClass}">
-                                    ${risk.risk_level} RISK (${risk.risk_score}/100)
-                                </span>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                <div>
-                                    <p class="text-gray-500">Revenue</p>
-                                    <p class="font-medium">${formatCurrency(business.gross_receipts)}</p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500">Operating Income</p>
-                                    <p class="font-medium ${(business.ordinary_income_loss || 0) < 0 ? 'text-red-600' : 'text-green-600'}">
-                                        ${formatCurrency(business.ordinary_income_loss)}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500">Tax Period</p>
-                                    <p class="font-medium">${business.tax_period_formatted || business.tax_period || 'N/A'}</p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500">Est. Tax Exposure</p>
-                                    <p class="font-medium">${formatCurrency(risk.estimated_tax_exposure?.total_estimate || 0)}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        // Update Admin Queue
-        function updateAdminQueue() {
-            if (state.currentUser.role !== 'admin') return;
-            
-            const adminQueue = document.getElementById('adminQueue');
-            const pendingQueue = state.queue.filter(q => q.status === 'pending');
-            
-            if (pendingQueue.length === 0) {
-                adminQueue.innerHTML = '<p class="text-gray-500">No pending requests</p>';
-                return;
-            }
-            
-            adminQueue.innerHTML = pendingQueue.map(item => `
-                <div class="border rounded-lg p-4 bg-yellow-50">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h4 class="font-medium">${item.businessName}</h4>
-                            <p class="text-sm text-gray-600">EIN: ${item.ein}</p>
-                            <p class="text-xs text-gray-500">Requested by: ${item.requestedBy}</p>
-                            <p class="text-xs text-gray-500">Time: ${new Date(item.requestedAt).toLocaleString()}</p>
-                        </div>
-                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                            Action Required
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Show Business Details
-        function showBusinessDetails(businessId) {
-            const business = state.businesses.find(b => b.id == businessId);
-            if (!business) return;
-            
-            // Different views for admin vs customer
-            if (state.currentUser.role === 'admin') {
-                // Admin can see transcript details
-                showAdminBusinessDetails(business);
-            } else {
-                // Customer sees only aggregated analysis
-                showCustomerBusinessDetails(business);
-            }
-        }
-        
-        // Customer view - aggregated analysis only
-        function showCustomerBusinessDetails(business) {
-            const latestTranscript = business.transcripts ? business.transcripts[business.transcripts.length - 1] : null;
-            const data = latestTranscript ? latestTranscript.data : business;
-            const risk = business.riskAssessment || { risk_level: 'LOW', risk_score: 0 };
-            
-            // Get historical data for trends
-            const historicalData = [];
-            if (business.transcripts) {
-                business.transcripts.forEach(t => {
-                    if (t.data && t.data.tax_period && t.data.gross_receipts) {
-                        historicalData.push({
-                            year: t.data.tax_period.substring(0, 4),
-                            revenue: t.data.gross_receipts,
-                            income: t.data.ordinary_income_loss
-                        });
-                    }
-                });
-            }
-            
-            const modalHTML = `
-                <div class="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-auto">
-                    <!-- Header -->
-                    <div class="bg-gray-900 text-white p-6">
-                        <h2 class="text-2xl font-bold">${business.businessName}</h2>
-                        <p class="mt-1 opacity-90">EIN: ${business.ein}</p>
-                    </div>
-                    
-                    <!-- Risk Overview -->
-                    <div class="p-6 border-b">
-                        <h3 class="text-lg font-semibold mb-4">Risk Assessment</h3>
-                        <div class="flex items-center gap-8">
-                            <div class="text-center">
-                                <div class="text-4xl font-bold ${risk.risk_level === 'HIGH' ? 'text-red-600' : risk.risk_level === 'MEDIUM' ? 'text-yellow-600' : 'text-green-600'}">
-                                    ${risk.risk_score}
-                                </div>
-                                <p class="text-sm text-gray-600">Risk Score</p>
-                            </div>
-                            <div class="flex-1">
-                                <div class="bg-gray-200 rounded-full h-4 mb-2">
-                                    <div class="h-4 rounded-full ${risk.risk_level === 'HIGH' ? 'bg-red-500' : risk.risk_level === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'}" 
-                                         style="width: ${risk.risk_score}%"></div>
-                                </div>
-                                <p class="text-sm font-medium">${risk.risk_level} RISK</p>
-                            </div>
-                        </div>
-                        ${risk.recommendations && risk.recommendations.length > 0 ? `
-                            <div class="mt-4">
-                                <p class="font-medium text-sm mb-2">Recommendations:</p>
-                                <ul class="list-disc list-inside text-sm text-gray-600">
-                                    ${risk.recommendations.map(r => `<li>${r}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- Financial Summary -->
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">Financial Summary</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
-                            <div>
-                                <p class="text-sm text-gray-600">Latest Revenue</p>
-                                <p class="text-2xl font-bold">${formatCurrency(data.gross_receipts)}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-600">Operating Income</p>
-                                <p class="text-2xl font-bold ${(data.ordinary_income_loss || 0) < 0 ? 'text-red-600' : 'text-green-600'}">
-                                    ${formatCurrency(data.ordinary_income_loss)}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-600">Recommended Credit Limit</p>
-                                <p class="text-2xl font-bold">${formatCurrency(Math.min((data.gross_receipts || 0) * 0.1, 500000))}</p>
-                            </div>
-                        </div>
-                        
-                        ${historicalData.length > 1 ? `
-                            <div class="mt-6">
-                                <h4 class="font-medium mb-3">Revenue Trend</h4>
-                                <div class="bg-gray-50 p-4 rounded">
-                                    ${historicalData.sort((a, b) => b.year - a.year).slice(0, 3).map(d => `
-                                        <div class="flex justify-between py-1">
-                                            <span class="text-sm text-gray-600">${d.year}:</span>
-                                            <span class="font-medium">${formatCurrency(d.revenue)}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- Key Metrics -->
-                    <div class="p-6 bg-gray-50">
-                        <h3 class="text-lg font-semibold mb-4">Key Business Metrics</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-white p-4 rounded">
-                                <p class="text-sm text-gray-600">Total Assets</p>
-                                <p class="font-semibold">${formatCurrency(data.total_assets_eoy)}</p>
-                            </div>
-                            <div class="bg-white p-4 rounded">
-                                <p class="text-sm text-gray-600">Debt Ratio</p>
-                                <p class="font-semibold">${data.debt_to_asset_ratio ? (data.debt_to_asset_ratio * 100).toFixed(1) + '%' : 'N/A'}</p>
-                            </div>
-                            <div class="bg-white p-4 rounded">
-                                <p class="text-sm text-gray-600">Gross Margin</p>
-                                <p class="font-semibold">${data.gross_margin_percent ? data.gross_margin_percent.toFixed(1) + '%' : 'N/A'}</p>
-                            </div>
-                            <div class="bg-white p-4 rounded">
-                                <p class="text-sm text-gray-600">Est. Tax Exposure</p>
-                                <p class="font-semibold">${formatCurrency(risk.estimated_tax_exposure?.total_estimate || 0)}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Footer -->
-                    <div class="p-6 border-t text-center">
-                        <button onclick="this.closest('.fixed').remove()" class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = modalHTML;
-            document.body.appendChild(modal);
-        }
-        
-        // Admin view - can see transcript details
-        function showAdminBusinessDetails(business) {
-            let detailsHTML = `
-                <h3 class="text-xl font-bold mb-4">${business.businessName}</h3>
-                <p class="text-gray-600 mb-4">EIN: ${business.ein}</p>
-            `;
-            
-            if (business.transcripts && business.transcripts.length > 0) {
-                detailsHTML += `<h4 class="font-semibold mb-3">Available Transcripts:</h4>`;
-                
-                // Sort transcripts by tax period
-                const sortedTranscripts = [...business.transcripts].sort((a, b) => 
-                    (b.data.tax_period || '').localeCompare(a.data.tax_period || '')
-                );
-                
-                sortedTranscripts.forEach(transcript => {
-                    const data = transcript.data;
-                    const risk = transcript.riskAssessment;
-                    
-                    detailsHTML += `
-                        <div class="border rounded-lg p-4 mb-4">
-                            <div class="flex justify-between items-center mb-3">
-                                <h5 class="font-medium">
-                                    ${data.form_type || 'Unknown Form'} - ${data.tax_period_formatted || data.tax_period || 'N/A'}
-                                </h5>
-                                <span class="px-2 py-1 rounded text-xs font-medium ${
-                                    risk.risk_level === 'HIGH' ? 'bg-red-100 text-red-800' : 
-                                    risk.risk_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
-                                    'bg-green-100 text-green-800'
-                                }">
-                                    ${risk.risk_level} (${risk.risk_score}/100)
-                                </span>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span class="text-gray-500">Gross Receipts:</span>
-                                    <span class="ml-2 font-medium">${formatCurrency(data.gross_receipts)}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Operating Income:</span>
-                                    <span class="ml-2 font-medium ${(data.ordinary_income_loss || 0) < 0 ? 'text-red-600' : 'text-green-600'}">
-                                        ${formatCurrency(data.ordinary_income_loss)}
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Total Assets:</span>
-                                    <span class="ml-2 font-medium">${formatCurrency(data.total_assets_eoy)}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Est. Tax Exposure:</span>
-                                    <span class="ml-2 font-medium">${formatCurrency(risk.estimated_tax_exposure?.total_estimate || 0)}</span>
-                                </div>
-                            </div>
-                            
-                            ${risk.risk_factors.length > 0 ? `
-                                <div class="mt-3 text-sm">
-                                    <span class="font-medium">Risk Factors:</span>
-                                    <ul class="list-disc list-inside mt-1 text-gray-600">
-                                        ${risk.risk_factors.map(f => `<li>${f}</li>`).join('')}
-                                    </ul>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                });
-            } else {
-                // Legacy format for businesses without transcript array
-                detailsHTML += `<pre class="bg-gray-100 p-4 rounded overflow-auto text-xs">${JSON.stringify(business, null, 2)}</pre>`;
-            }
-            
-            // Show in modal
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-auto p-6">
-                    ${detailsHTML}
-                    <button onclick="this.closest('.fixed').remove()" class="mt-4 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">
-                        Close
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        // Utility Functions
-        function formatCurrency(value) {
-            if (value === null || value === undefined) return 'N/A';
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(value);
+        function showPricing() {
+            // In production, this would navigate to a pricing page or show a modal
+            alert('Pricing page would be shown here');
         }
 
         function logout() {
-            localStorage.removeItem('clearfirm_user');
+            localStorage.removeItem('authToken');
+            authToken = null;
+            currentUser = null;
             location.reload();
         }
+
+        // Load user data and requests
+        async function loadUserData() {
+            try {
+                // Load subscription status
+                const subResponse = await fetch(`${API_URL}/billing/subscription`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (subResponse.ok) {
+                    const subData = await subResponse.json();
+                    document.getElementById('creditsDisplay').textContent = 
+                        `Credits: ${subData.credits_remaining || 0}`;
+                    
+                    if (subData.subscription_status !== 'active') {
+                        document.getElementById('subscriptionAlert').classList.remove('hidden');
+                    }
+                }
+                
+                // Load requests
+                const reqResponse = await fetch(`${API_URL}/business/requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (reqResponse.ok) {
+                    const requests = await reqResponse.json();
+                    displayRequests(requests);
+                }
+                
+                if (currentUser) {
+                    document.getElementById('userEmail').textContent = currentUser.email;
+                }
+            } catch (error) {
+                console.error('Failed to load user data:', error);
+            }
+        }
+
+        function displayRequests(requests) {
+            const container = document.getElementById('requestsList');
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No verification requests yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = requests.map(req => {
+                const statusColor = req.status === 'completed' ? 'green' : 
+                                  req.status === 'failed' ? 'red' : 'yellow';
+                const riskColor = req.risk_level === 'HIGH' ? 'red' :
+                                req.risk_level === 'MEDIUM' ? 'yellow' : 'green';
+                
+                return `
+                    <div class="border rounded-lg p-4 ${req.status === 'completed' ? 'cursor-pointer hover:shadow-md' : ''}"
+                         ${req.status === 'completed' ? `onclick="viewBusinessDetails(${req.id})"` : ''}>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold">${req.business_name}</h3>
+                                <p class="text-sm text-gray-600">EIN: ${req.ein}</p>
+                                <p class="text-xs text-gray-500">
+                                    Requested: ${new Date(req.created_at).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800">
+                                    ${req.status.toUpperCase()}
+                                </span>
+                                ${req.status === 'completed' ? `
+                                    <div class="mt-2">
+                                        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-${riskColor}-100 text-${riskColor}-800">
+                                            ${req.risk_level} RISK
+                                        </span>
+                                        <p class="text-sm font-semibold mt-1">Score: ${req.risk_score}/100</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function viewBusinessDetails(requestId) {
+            try {
+                const response = await fetch(`${API_URL}/business/${requestId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const business = await response.json();
+                    // Show detailed business view
+                    alert(`Business details would be shown here for ${business.business_name}`);
+                }
+            } catch (error) {
+                console.error('Failed to load business details:', error);
+            }
+        }
+
+        // Business verification
+        async function requestVerification(ein, businessName) {
+            try {
+                const response = await fetch(`${API_URL}/business/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ein, businessName })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('Verification request submitted successfully!');
+                    document.getElementById('verifyForm').reset();
+                    loadUserData(); // Reload to show new request
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Verification request failed');
+                }
+            } catch (error) {
+                alert('Failed to submit request. Please try again.');
+            }
+        }
+
+        // Stripe checkout
+        async function selectPlan(priceId) {
+            if (!authToken) {
+                showRegister();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/billing/create-checkout-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ priceId })
+                });
+                
+                if (response.ok) {
+                    const { url } = await response.json();
+                    window.location.href = url;
+                } else {
+                    alert('Failed to start checkout. Please try again.');
+                }
+            } catch (error) {
+                alert('Checkout failed. Please try again.');
+            }
+        }
+
+        // Form handlers
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            await login(email, password);
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const companyName = document.getElementById('companyName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            await register(companyName, email, password);
+        });
+
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const ein = document.getElementById('verifyEin').value;
+            const businessName = document.getElementById('verifyBusinessName').value;
+            await requestVerification(ein, businessName);
+        });
     </script>
 </body>
 </html>
