@@ -885,6 +885,11 @@
                 }
             }
             
+            // Initialize transcripts array if it doesn't exist
+            if (!business.transcripts) {
+                business.transcripts = [];
+            }
+            
             // Add transcripts to the business
             let addedCount = 0;
             state.uploadedTranscripts.forEach(transcript => {
@@ -932,15 +937,21 @@
                 queueItem.completedAt = new Date().toISOString();
             }
             
+            // Remove any old duplicate entries for this EIN
+            state.businesses = state.businesses.filter(b => 
+                b.id === business.id || b.ein.trim().toUpperCase() !== ein.trim().toUpperCase()
+            );
+            
             saveBusinesses();
             saveQueue();
             
             // Clear form
             document.getElementById('uploadForm').reset();
             document.getElementById('extractedFields').classList.add('hidden');
+            const uploadedCount = state.uploadedTranscripts.length;
             state.uploadedTranscripts = [];
             
-            alert(`Successfully processed ${state.uploadedTranscripts.length} transcript(s) for ${businessName}.\nTotal transcripts for this business: ${business.transcripts.length}`);
+            alert(`Successfully processed ${uploadedCount} transcript(s) for ${businessName}.\nTotal transcripts for this business: ${business.transcripts.length}`);
             updateAdminQueue();
             
             // If on portfolio tab, refresh it
