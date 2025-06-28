@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1184,28 +1184,66 @@
             handleUpload({ preventDefault: () => {} });
         }
 
-        // Load Data Functions
+        // Load Data Functions with error handling
         function loadBusinesses() {
-            const saved = localStorage.getItem('clearfirm_businesses');
-            if (saved) {
-                state.businesses = JSON.parse(saved);
+            try {
+                const saved = localStorage.getItem('clearfirm_businesses');
+                console.log('Loading businesses, raw data:', saved);
+                if (saved) {
+                    state.businesses = JSON.parse(saved);
+                    console.log('Loaded', state.businesses.length, 'businesses');
+                } else {
+                    state.businesses = [];
+                    console.log('No businesses found in localStorage');
+                }
+            } catch (error) {
+                console.error('Error loading businesses:', error);
+                state.businesses = [];
             }
         }
 
         function loadQueue() {
-            const saved = localStorage.getItem('clearfirm_queue');
-            if (saved) {
-                state.queue = JSON.parse(saved);
+            try {
+                const saved = localStorage.getItem('clearfirm_queue');
+                if (saved) {
+                    state.queue = JSON.parse(saved);
+                    console.log('Loaded', state.queue.length, 'queue items');
+                } else {
+                    state.queue = [];
+                }
+            } catch (error) {
+                console.error('Error loading queue:', error);
+                state.queue = [];
             }
             updateQueueDisplay();
         }
 
+        // Save functions with error handling
         function saveBusinesses() {
-            localStorage.setItem('clearfirm_businesses', JSON.stringify(state.businesses));
+            try {
+                const dataToSave = JSON.stringify(state.businesses);
+                localStorage.setItem('clearfirm_businesses', dataToSave);
+                console.log('Saved businesses:', state.businesses.length, 'businesses');
+                console.log('First business:', state.businesses[0]);
+                
+                // Verify save
+                const saved = localStorage.getItem('clearfirm_businesses');
+                if (!saved) {
+                    console.error('Failed to save businesses!');
+                }
+            } catch (error) {
+                console.error('Error saving businesses:', error);
+                alert('Error saving data: ' + error.message);
+            }
         }
 
         function saveQueue() {
-            localStorage.setItem('clearfirm_queue', JSON.stringify(state.queue));
+            try {
+                localStorage.setItem('clearfirm_queue', JSON.stringify(state.queue));
+                console.log('Saved queue:', state.queue.length, 'items');
+            } catch (error) {
+                console.error('Error saving queue:', error);
+            }
         }
 
         // Update Queue Display
