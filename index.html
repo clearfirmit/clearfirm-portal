@@ -851,53 +851,71 @@
         function handleUpload(e) {
             e.preventDefault();
             
-            const ein = document.getElementById('ein').value;
-            const businessName = document.getElementById('businessName').value;
+            const ein = document.getElementById('ein').value.trim();
+            const businessName = document.getElementById('businessName').value.trim();
             
             if (!ein || !businessName || state.uploadedTranscripts.length === 0) {
                 alert('Please fill in all fields and upload at least one transcript');
                 return;
             }
             
-            // Check if business already exists
-            let business = state.businesses.find(b => b.ein === ein);
+            // Find existing business by EIN (case-insensitive and trim spaces)
+            let business = state.businesses.find(b => 
+                b.ein && b.ein.trim().toUpperCase() === ein.trim().toUpperCase()
+            );
             
             if (!business) {
                 // Create new business entry
                 business = {
                     id: Date.now(),
-                    ein,
-                    businessName,
+                    ein: ein,
+                    businessName: businessName,
                     transcripts: [],
                     uploadedBy: state.currentUser.email,
                     uploadedAt: new Date().toISOString(),
                     status: 'verified'
                 };
                 state.businesses.push(business);
+                console.log('Created new business:', business);
+            } else {
+                console.log('Found existing business:', business);
+                // Update business name if different
+                if (business.businessName !== businessName) {
+                    business.businessName = businessName;
+                }
             }
             
             // Add transcripts to the business
+            let addedCount = 0;
             state.uploadedTranscripts.forEach(transcript => {
                 // Check if transcript for this period already exists
                 const existingIndex = business.transcripts.findIndex(t => 
+                    t.data && transcript.data && 
                     t.data.tax_period === transcript.data.tax_period
                 );
                 
                 if (existingIndex >= 0) {
                     // Update existing transcript
                     business.transcripts[existingIndex] = transcript;
+                    console.log('Updated existing transcript for period:', transcript.data.tax_period);
                 } else {
                     // Add new transcript
                     business.transcripts.push(transcript);
+                    addedCount++;
+                    console.log('Added new transcript for period:', transcript.data.tax_period);
                 }
             });
             
             // Calculate overall risk assessment based on latest transcript
-            const latestTranscript = business.transcripts.sort((a, b) => 
-                (b.data.tax_period || '').localeCompare(a.data.tax_period || '')
-            )[0];
+            const sortedTranscripts = business.transcripts.sort((a, b) => {
+                const periodA = a.data?.tax_period || '';
+                const periodB = b.data?.tax_period || '';
+                return periodB.localeCompare(periodA);
+            });
             
-            if (latestTranscript) {
+            const latestTranscript = sortedTranscripts[0];
+            
+            if (latestTranscript && latestTranscript.data) {
                 business.riskAssessment = latestTranscript.riskAssessment;
                 // Copy key fields to business level for easy display
                 business.gross_receipts = latestTranscript.data.gross_receipts;
@@ -922,8 +940,13 @@
             document.getElementById('extractedFields').classList.add('hidden');
             state.uploadedTranscripts = [];
             
-            alert(`Successfully uploaded ${business.transcripts.length} transcript(s) for ${businessName}`);
+            alert(`Successfully processed ${state.uploadedTranscripts.length} transcript(s) for ${businessName}.\nTotal transcripts for this business: ${business.transcripts.length}`);
             updateAdminQueue();
+            
+            // If on portfolio tab, refresh it
+            if (document.getElementById('portfolioContent').classList.contains('hidden') === false) {
+                updatePortfolio();
+            }
         }
 
         // Save Business Profile
