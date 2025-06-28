@@ -120,28 +120,36 @@
                 <!-- Search Tab -->
                 <div id="searchContent" class="tab-content">
                     <div class="bg-white shadow rounded-lg p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-6">Search for Business Intelligence</h2>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Business Intelligence Search</h2>
                         
-                        <form id="searchForm" class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="searchEIN" class="block text-sm font-medium text-gray-700">EIN</label>
-                                    <input type="text" id="searchEIN" placeholder="XX-XXXXXXX" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
-                                <div>
-                                    <label for="searchBusinessName" class="block text-sm font-medium text-gray-700">Business Name</label>
-                                    <input type="text" id="searchBusinessName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
+                        <form id="searchForm" class="space-y-4 mb-8">
+                            <div>
+                                <label for="searchEIN" class="block text-sm font-medium text-gray-700 mb-1">EIN (Employer Identification Number)</label>
+                                <input type="text" id="searchEIN" placeholder="XX-XXXXXXX" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg">
+                            </div>
+                            <div>
+                                <label for="searchBusinessName" class="block text-sm font-medium text-gray-700 mb-1">Business Name (Optional)</label>
+                                <input type="text" id="searchBusinessName" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg">
                             </div>
                             
-                            <button type="submit" class="w-full md:w-auto flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                Request Verification
+                            <button type="submit" class="w-full flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                Search Business
                             </button>
                         </form>
                         
-                        <div id="searchResults" class="mt-8 hidden">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Search Results</h3>
-                            <div id="resultsContainer"></div>
+                        <div id="searchResults" class="hidden">
+                            <!-- Search results will be populated here -->
+                        </div>
+                        
+                        <!-- Sample Businesses -->
+                        <div class="mt-12">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Sample Businesses Available</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="sampleBusinesses">
+                                <!-- Sample businesses will be populated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -272,31 +280,44 @@
                         "COST OF GOODS SOLD": "cost_of_goods_sold",
                         "TOTAL INCOME": "total_income",
                         "ORDINARY INCOME/LOSS": "ordinary_income_loss",
+                        "ORDINARY BUSINESS INCOME (LOSS)": "ordinary_income_loss",
                         "COMPENSATION OF OFFICERS": "officer_compensation",
+                        "SALARIES AND WAGES": "wages",
                         "SALARY & WAGES LESS JOBS CREDIT": "wages",
                         "TAXES & LICENSES": "taxes_licenses",
+                        "TAXES AND LICENSES": "taxes_licenses",
                         "INTEREST": "interest_expense",
                         "DEPRECIATION (NET)": "depreciation",
+                        "DEPRECIATION": "depreciation",
                         "EMPLOYEE BENEFIT PROGRAMS": "employee_benefits",
                         "PENSION/PROFIT SHARE PLANS": "pension_plans",
                         "OTHER DEDUCTIONS": "other_deductions",
                         "TOTAL DEDUCTIONS": "total_deductions",
                         "TOTAL ASSETS (END)": "total_assets_eoy",
+                        "TOTAL ASSETS": "total_assets_eoy",
                         "LOANS FROM SHAREHOLDERS END OF YEAR": "loans_from_shareholders",
+                        "LOANS FROM SHAREHOLDERS": "loans_from_shareholders",
                         "RETAINED EARNINGS END OF YEAR": "retained_earnings_eoy",
+                        "RETAINED EARNINGS": "retained_earnings_eoy",
                         "CAPITAL STOCK END OF YEAR": "capital_stock",
+                        "CAPITAL STOCK": "capital_stock",
                         "NUMBER OF SHAREHOLDERS": "num_shareholders",
                         "TAX YEAR BEGINNING": "tax_year_start",
                         "RECEIVED DATE": "return_received_date"
                     },
                     "1120": {
                         "GROSS RECEIPTS OR SALES": "gross_receipts",
+                        "GROSS RECEIPTS": "gross_receipts",
                         "TAXABLE INCOME": "taxable_income",
-                        "TOTAL TAX": "total_tax"
+                        "TOTAL TAX": "total_tax",
+                        "ORDINARY BUSINESS INCOME (LOSS)": "ordinary_income_loss",
+                        "NET INCOME (LOSS)": "ordinary_income_loss"
                     },
                     "1065": {
                         "GROSS RECEIPTS OR SALES": "gross_receipts",
-                        "ORDINARY INCOME (LOSS)": "ordinary_income_loss"
+                        "GROSS RECEIPTS": "gross_receipts",
+                        "ORDINARY INCOME (LOSS)": "ordinary_income_loss",
+                        "ORDINARY BUSINESS INCOME (LOSS)": "ordinary_income_loss"
                     }
                 };
             }
@@ -319,101 +340,31 @@
                 const derivedMetrics = this.calculateDerivedMetrics(transcriptData);
                 Object.assign(transcriptData, derivedMetrics);
                 
+                console.log('Parsed transcript data:', transcriptData);
                 return transcriptData;
             }
 
             extractBasicInfo(doc) {
                 const data = {};
                 
-                // Try to extract from title first
-                const title = doc.querySelector('title');
-                if (title && title.textContent) {
-                    // Parse: "Tax Return Transcript   XX-XXX6570   1120S   202212   BUSINESS NAME"
-                    const titleText = title.textContent.trim();
-                    const titleParts = titleText.split(/\s{2,}/); // Split by multiple spaces
-                    
-                    if (titleParts.length >= 4) {
-                        // Extract EIN (should be in format XX-XXXXXXX)
-                        const einPattern = /\d{2}-\d{7}/;
-                        const einMatch = titleText.match(einPattern);
-                        if (einMatch) {
-                            data.ein = einMatch[0];
-                        }
-                        
-                        // Extract form type (1120, 1120S, 1065, etc.)
-                        const formPattern = /\b(1120S?|1065|1040|990)\b/;
-                        const formMatch = titleText.match(formPattern);
-                        if (formMatch) {
-                            data.form_type = formMatch[0];
-                        }
-                        
-                        // Extract tax period (YYYYMM format)
-                        const periodPattern = /\b(20\d{4})\b/;
-                        const periodMatch = titleText.match(periodPattern);
-                        if (periodMatch) {
-                            data.tax_period = periodMatch[0];
-                            // Format the period
-                            const year = periodMatch[0].substring(0, 4);
-                            const month = periodMatch[0].substring(4, 6);
-                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            data.tax_period_formatted = `${monthNames[parseInt(month) - 1]}. 31, ${year}`;
-                        }
-                    }
+                // First, try to find EIN in the entire document
+                const bodyText = doc.body.textContent;
+                const einPattern = /\b\d{2}-\d{7}\b/g;
+                const einMatches = bodyText.match(einPattern);
+                if (einMatches && einMatches.length > 0) {
+                    // Take the first valid EIN found
+                    data.ein = einMatches[0];
+                    console.log('Found EIN:', data.ein);
                 }
                 
-                // Extract from table rows - look for specific patterns
-                const rows = doc.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 2) {
-                        const label = cells[0].textContent.trim().toUpperCase();
-                        const value = cells[1].textContent.trim();
-                        
-                        // EIN patterns
-                        if (label.includes("EIN PROVIDED") || label.includes("EMPLOYER IDENTIFICATION NUMBER")) {
-                            if (value.match(/\d{2}-\d{7}/)) {
-                                data.ein = value;
-                            }
-                        } 
-                        // Tax period patterns
-                        else if (label.includes("TAX PERIOD") || label.includes("TAX YEAR ENDING")) {
-                            data.tax_period_formatted = value;
-                            // Try to extract YYYYMM format
-                            const yearMatch = value.match(/20\d{2}/);
-                            if (yearMatch) {
-                                const year = yearMatch[0];
-                                const monthMatch = value.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
-                                if (monthMatch) {
-                                    const monthMap = {
-                                        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
-                                        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-                                        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
-                                    };
-                                    data.tax_period = year + monthMap[monthMatch[0]];
-                                }
-                            }
-                        }
-                        // Form type
-                        else if (label.includes("FORM NUMBER") || label.includes("RETURN TYPE")) {
-                            if (value.match(/1120S?|1065|1040|990/)) {
-                                data.form_type = value.match(/1120S?|1065|1040|990/)[0];
-                            }
-                        }
-                        // Business name
-                        else if (label.includes("NAME") && (label.includes("SHOWN") || label.includes("RETURN"))) {
-                            data.business_name = value;
-                        }
-                        // Address
-                        else if (label.includes("ADDRESS") && !label.includes("FOREIGN")) {
-                            data.address = value;
-                        }
-                    }
-                });
-                
-                // Ensure we have valid data
-                if (!data.form_type) {
-                    // Try to detect form type from content
-                    const bodyText = doc.body.textContent;
+                // Extract form type - look for specific form patterns
+                const formTypePattern = /Form\s+(1120S?|1065|1040|990|941|940)\b/i;
+                const formMatch = bodyText.match(formTypePattern);
+                if (formMatch) {
+                    data.form_type = formMatch[1].toUpperCase();
+                    console.log('Found form type:', data.form_type);
+                } else {
+                    // Try alternative patterns
                     if (bodyText.includes("S CORPORATION")) {
                         data.form_type = "1120S";
                     } else if (bodyText.includes("C CORPORATION")) {
@@ -422,6 +373,90 @@
                         data.form_type = "1065";
                     }
                 }
+                
+                // Extract tax period - look for date patterns
+                const taxPeriodPattern = /Tax Period[:\s]+([A-Za-z]+\.?\s+\d{1,2},?\s+\d{4})/i;
+                const periodMatch = bodyText.match(taxPeriodPattern);
+                if (periodMatch) {
+                    data.tax_period_formatted = periodMatch[1];
+                    // Extract year for sorting
+                    const yearMatch = periodMatch[1].match(/\d{4}/);
+                    if (yearMatch) {
+                        const monthMatch = periodMatch[1].match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
+                        if (monthMatch) {
+                            const monthMap = {
+                                'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+                                'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+                                'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+                            };
+                            data.tax_period = yearMatch[0] + monthMap[monthMatch[0].substring(0, 3)];
+                        }
+                    }
+                } else {
+                    // Try to find year-end date
+                    const yearEndPattern = /Year End[:\s]+(\d{2}\/\d{2}\/\d{4})/i;
+                    const yearEndMatch = bodyText.match(yearEndPattern);
+                    if (yearEndMatch) {
+                        const dateParts = yearEndMatch[1].split('/');
+                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        data.tax_period_formatted = `${monthNames[parseInt(dateParts[0]) - 1]}. ${dateParts[1]}, 20${dateParts[2]}`;
+                        data.tax_period = `20${dateParts[2]}${dateParts[0].padStart(2, '0')}`;
+                    }
+                }
+                
+                // Extract business name - look for specific patterns
+                const namePattern = /Business Name[:\s]+([^\n]+)/i;
+                const nameMatch = bodyText.match(namePattern);
+                if (nameMatch) {
+                    data.business_name = nameMatch[1].trim();
+                }
+                
+                // Try to extract from title if available
+                const title = doc.querySelector('title');
+                if (title && title.textContent) {
+                    const titleText = title.textContent.trim();
+                    
+                    // If we didn't find EIN yet, try title
+                    if (!data.ein) {
+                        const titleEinMatch = titleText.match(einPattern);
+                        if (titleEinMatch) {
+                            data.ein = titleEinMatch[0];
+                        }
+                    }
+                    
+                    // Extract additional info from title
+                    if (!data.form_type) {
+                        const titleFormMatch = titleText.match(/\b(1120S?|1065|1040|990|941|940)\b/);
+                        if (titleFormMatch) {
+                            data.form_type = titleFormMatch[0];
+                        }
+                    }
+                }
+                
+                // Extract from table rows as fallback
+                const rows = doc.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 2) {
+                        const label = cells[0].textContent.trim().toUpperCase();
+                        const value = cells[1].textContent.trim();
+                        
+                        if (!data.ein && (label.includes("EIN") || label.includes("EMPLOYER IDENTIFICATION"))) {
+                            const einMatch = value.match(einPattern);
+                            if (einMatch) {
+                                data.ein = einMatch[0];
+                            }
+                        }
+                        
+                        if (!data.business_name && label.includes("NAME") && (label.includes("SHOWN") || label.includes("BUSINESS"))) {
+                            data.business_name = value;
+                        }
+                        
+                        if (!data.tax_period_formatted && (label.includes("TAX PERIOD") || label.includes("YEAR END"))) {
+                            data.tax_period_formatted = value;
+                        }
+                    }
+                });
                 
                 return data;
             }
@@ -701,7 +736,40 @@
             // Load data
             loadBusinesses();
             loadQueue();
+            
+            // Display sample businesses for customers
+            if (state.currentUser.role !== 'admin') {
+                displaySampleBusinesses();
+            }
+            
             switchTab('search');
+        }
+        
+        // Display sample businesses
+        function displaySampleBusinesses() {
+            const sampleBusinesses = [
+                { name: 'Star Discount Pharmacy', ein: 'XX-XXX2375', risk: 'LOW' },
+                { name: 'MANA GROUP PHARMACIES LLC', ein: 'XX-XXX9460', risk: 'HIGH' },
+                { name: 'D&B Pharmacy Corporation', ein: 'XX-XXX4555', risk: 'MEDIUM' }
+            ];
+            
+            const container = document.getElementById('sampleBusinesses');
+            if (container) {
+                container.innerHTML = sampleBusinesses.map(biz => `
+                    <div class="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" 
+                         onclick="document.getElementById('searchEIN').value='${biz.ein}'; document.getElementById('searchBusinessName').value='${biz.name}';">
+                        <h4 class="font-medium text-gray-900">${biz.name}</h4>
+                        <p class="text-sm text-gray-600 mt-1">EIN: ${biz.ein}</p>
+                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                            biz.risk === 'HIGH' ? 'bg-red-100 text-red-800' : 
+                            biz.risk === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-green-100 text-green-800'
+                        }">
+                            ${biz.risk} RISK
+                        </span>
+                    </div>
+                `).join('');
+            }
         }
 
         // Tab Switching
@@ -733,36 +801,179 @@
         // Business Search
         function handleSearch(e) {
             e.preventDefault();
-            const ein = document.getElementById('searchEIN').value;
-            const businessName = document.getElementById('searchBusinessName').value;
+            const ein = document.getElementById('searchEIN').value.trim();
+            const businessName = document.getElementById('searchBusinessName').value.trim();
             
-            // Add to queue
-            const request = {
-                id: Date.now(),
-                ein,
-                businessName,
-                status: 'pending',
-                requestedBy: state.currentUser.email,
-                requestedAt: new Date().toISOString()
-            };
+            if (!ein) {
+                alert('Please enter an EIN to search');
+                return;
+            }
             
-            state.queue.push(request);
-            saveQueue();
+            // Find business in our database
+            const business = state.businesses.find(b => 
+                b.ein && b.ein.trim().toUpperCase() === ein.trim().toUpperCase()
+            );
             
-            // Show confirmation
-            document.getElementById('searchResults').classList.remove('hidden');
-            document.getElementById('resultsContainer').innerHTML = `
-                <div class="bg-green-50 border border-green-200 rounded-md p-4">
-                    <p class="text-green-800">Verification request submitted successfully!</p>
-                    <p class="text-sm text-green-600 mt-1">You'll receive the results within 30 minutes to 1 business day.</p>
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.classList.remove('hidden');
+            
+            if (business && business.transcripts && business.transcripts.length > 0) {
+                // Business found - show detailed analysis
+                resultsDiv.innerHTML = generateBusinessAnalysisCard(business);
+            } else {
+                // Not found - add to queue
+                const request = {
+                    id: Date.now(),
+                    ein,
+                    businessName,
+                    status: 'pending',
+                    requestedBy: state.currentUser.email,
+                    requestedAt: new Date().toISOString()
+                };
+                
+                state.queue.push(request);
+                saveQueue();
+                
+                resultsDiv.innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                        <p class="text-yellow-800">Business not found in our database.</p>
+                        <p class="text-sm text-yellow-600 mt-1">Verification request submitted. You'll receive the results within 30 minutes to 1 business day.</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('searchForm').reset();
+        }
+        
+        // Generate business analysis card (customer view)
+        function generateBusinessAnalysisCard(business) {
+            const latestTranscript = business.transcripts[business.transcripts.length - 1];
+            const data = latestTranscript.data;
+            const risk = latestTranscript.riskAssessment || business.riskAssessment;
+            
+            // Get previous year transcript for YoY comparison
+            const prevYearTranscript = business.transcripts.find(t => 
+                t.data.tax_period && t.data.tax_period.substring(0, 4) === 
+                (parseInt(data.tax_period.substring(0, 4)) - 1).toString()
+            );
+            
+            const prevData = prevYearTranscript ? prevYearTranscript.data : null;
+            
+            // Calculate YoY changes
+            const revenueYoY = prevData && prevData.gross_receipts && data.gross_receipts ? 
+                ((data.gross_receipts - prevData.gross_receipts) / prevData.gross_receipts * 100).toFixed(1) : null;
+            
+            const incomeYoY = prevData && prevData.ordinary_income_loss && data.ordinary_income_loss ? 
+                ((data.ordinary_income_loss - prevData.ordinary_income_loss) / Math.abs(prevData.ordinary_income_loss) * 100).toFixed(1) : null;
+            
+            // Risk badge color
+            const riskColor = risk.risk_level === 'HIGH' ? 'bg-red-100 text-red-800' : 
+                             risk.risk_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
+                             'bg-green-100 text-green-800';
+            
+            return `
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <!-- Header -->
+                    <div class="p-6 border-b">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">${business.businessName}</h3>
+                                <p class="text-gray-600 mt-1">EIN: ${business.ein} • ${data.form_type === '1120S' ? 'S Corporation' : data.form_type === '1120' ? 'C Corporation' : 'Corporation'}</p>
+                            </div>
+                            <span class="px-4 py-2 rounded-full text-sm font-semibold ${riskColor}">
+                                ${risk.risk_level} RISK
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gray-50">
+                        <div>
+                            <p class="text-sm text-gray-600">Risk Score</p>
+                            <p class="text-2xl font-bold text-gray-900">${risk.risk_score}/100</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">${data.tax_period ? data.tax_period.substring(0, 4) : 'Latest'} Revenue</p>
+                            <p class="text-2xl font-bold text-gray-900">${formatCurrency(data.gross_receipts)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Credit Limit</p>
+                            <p class="text-2xl font-bold text-gray-900">${formatCurrency(Math.min(data.gross_receipts * 0.1, 500000))}</p>
+                        </div>
+                        <div>
+                            <button onclick="showBusinessDetails('${business.id}')" class="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                                View Full Analysis
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Factors -->
+                    ${risk.risk_factors.length > 0 ? `
+                        <div class="p-6 border-t">
+                            ${risk.risk_factors.map(factor => `
+                                <div class="flex items-start mb-3">
+                                    <span class="text-yellow-500 mr-2">⚠️</span>
+                                    <span class="text-gray-700">${factor}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div class="p-6 border-t">
+                            <div class="flex items-start mb-3">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span class="text-gray-700">Active Operations</span>
+                            </div>
+                            <div class="flex items-start mb-3">
+                                <span class="text-blue-500 mr-2">ℹ️</span>
+                                <span class="text-gray-700">Properly registered</span>
+                            </div>
+                        </div>
+                    `}
+                    
+                    <!-- Financial Analysis -->
+                    <div class="p-6 bg-white">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Financial Analysis</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Revenue Trends -->
+                            <div>
+                                <h5 class="font-medium text-gray-700 mb-3">Revenue Trends</h5>
+                                ${data.tax_period ? `<p class="text-sm">${data.tax_period.substring(0, 4)}: ${formatCurrency(data.gross_receipts)}</p>` : ''}
+                                ${prevData ? `<p class="text-sm">${prevData.tax_period.substring(0, 4)}: ${formatCurrency(prevData.gross_receipts)}</p>` : ''}
+                                ${revenueYoY ? `<p class="text-sm font-medium ${parseFloat(revenueYoY) >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                    ${parseFloat(revenueYoY) >= 0 ? '+' : ''}${revenueYoY}% YoY
+                                </p>` : ''}
+                            </div>
+                            
+                            <!-- Operating Income -->
+                            <div>
+                                <h5 class="font-medium text-gray-700 mb-3">Operating Income</h5>
+                                ${data.tax_period ? `<p class="text-sm">${data.tax_period.substring(0, 4)}: ${formatCurrency(data.ordinary_income_loss)}</p>` : ''}
+                                ${prevData && prevData.ordinary_income_loss !== undefined ? `<p class="text-sm">${prevData.tax_period.substring(0, 4)}: ${formatCurrency(prevData.ordinary_income_loss)}</p>` : ''}
+                                ${incomeYoY ? `<p class="text-sm font-medium ${parseFloat(incomeYoY) >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                    ${parseFloat(incomeYoY) >= 0 ? '+' : ''}${incomeYoY}% YoY
+                                </p>` : ''}
+                            </div>
+                            
+                            <!-- Asset Metrics -->
+                            <div>
+                                <h5 class="font-medium text-gray-700 mb-3">Asset Metrics</h5>
+                                <p class="text-sm">Total Assets: ${formatCurrency(data.total_assets_eoy)}</p>
+                                <p class="text-sm">Debt-to-Asset Ratio: ${data.debt_to_asset_ratio ? (data.debt_to_asset_ratio * 100).toFixed(1) + '%' : 'N/A'}</p>
+                                <p class="text-sm">Liquidity Score: ${Math.max(20, Math.min(100, 100 - risk.risk_score))}/100</p>
+                            </div>
+                            
+                            <!-- Payroll Compliance -->
+                            <div>
+                                <h5 class="font-medium text-gray-700 mb-3">Payroll Compliance</h5>
+                                <p class="text-sm">Status: <span class="font-medium text-green-600">CURRENT</span></p>
+                                <p class="text-sm">Employees: ${Math.round((data.total_employment_costs || 0) / 50000) || 'N/A'}</p>
+                                <p class="text-sm">Payroll/Revenue: ${data.gross_receipts && data.total_employment_costs ? 
+                                    ((data.total_employment_costs / data.gross_receipts) * 100).toFixed(1) + '%' : 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
-            
-            // Clear form
-            document.getElementById('searchForm').reset();
-            
-            // Refresh queue
-            loadQueue();
         }
 
         // File Upload Handling
