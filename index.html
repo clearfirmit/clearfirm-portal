@@ -325,38 +325,103 @@
             extractBasicInfo(doc) {
                 const data = {};
                 
-                // Extract from title
+                // Try to extract from title first
                 const title = doc.querySelector('title');
-                if (title) {
-                    const parts = title.textContent.split(/\s+/);
-                    if (parts.length >= 5) {
-                        data.ein = parts[3];
-                        data.form_type = parts[4];
-                        data.tax_period = parts[5];
+                if (title && title.textContent) {
+                    // Parse: "Tax Return Transcript   XX-XXX6570   1120S   202212   BUSINESS NAME"
+                    const titleText = title.textContent.trim();
+                    const titleParts = titleText.split(/\s{2,}/); // Split by multiple spaces
+                    
+                    if (titleParts.length >= 4) {
+                        // Extract EIN (should be in format XX-XXXXXXX)
+                        const einPattern = /\d{2}-\d{7}/;
+                        const einMatch = titleText.match(einPattern);
+                        if (einMatch) {
+                            data.ein = einMatch[0];
+                        }
+                        
+                        // Extract form type (1120, 1120S, 1065, etc.)
+                        const formPattern = /\b(1120S?|1065|1040|990)\b/;
+                        const formMatch = titleText.match(formPattern);
+                        if (formMatch) {
+                            data.form_type = formMatch[0];
+                        }
+                        
+                        // Extract tax period (YYYYMM format)
+                        const periodPattern = /\b(20\d{4})\b/;
+                        const periodMatch = titleText.match(periodPattern);
+                        if (periodMatch) {
+                            data.tax_period = periodMatch[0];
+                            // Format the period
+                            const year = periodMatch[0].substring(0, 4);
+                            const month = periodMatch[0].substring(4, 6);
+                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            data.tax_period_formatted = `${monthNames[parseInt(month) - 1]}. 31, ${year}`;
+                        }
                     }
                 }
                 
-                // Extract from table rows
+                // Extract from table rows - look for specific patterns
                 const rows = doc.querySelectorAll('tr');
                 rows.forEach(row => {
                     const cells = row.querySelectorAll('td');
                     if (cells.length >= 2) {
-                        const label = cells[0].textContent.trim().replace(':', '');
+                        const label = cells[0].textContent.trim().toUpperCase();
                         const value = cells[1].textContent.trim();
                         
-                        if (label.includes("EIN Provided")) {
-                            data.ein = value;
-                        } else if (label.includes("Tax Period Requested")) {
+                        // EIN patterns
+                        if (label.includes("EIN PROVIDED") || label.includes("EMPLOYER IDENTIFICATION NUMBER")) {
+                            if (value.match(/\d{2}-\d{7}/)) {
+                                data.ein = value;
+                            }
+                        } 
+                        // Tax period patterns
+                        else if (label.includes("TAX PERIOD") || label.includes("TAX YEAR ENDING")) {
                             data.tax_period_formatted = value;
-                        } else if (label.includes("Form Number")) {
-                            data.form_type = value;
-                        } else if (label.includes("NAME(S) SHOWN ON RETURN")) {
+                            // Try to extract YYYYMM format
+                            const yearMatch = value.match(/20\d{2}/);
+                            if (yearMatch) {
+                                const year = yearMatch[0];
+                                const monthMatch = value.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
+                                if (monthMatch) {
+                                    const monthMap = {
+                                        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+                                        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+                                        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+                                    };
+                                    data.tax_period = year + monthMap[monthMatch[0]];
+                                }
+                            }
+                        }
+                        // Form type
+                        else if (label.includes("FORM NUMBER") || label.includes("RETURN TYPE")) {
+                            if (value.match(/1120S?|1065|1040|990/)) {
+                                data.form_type = value.match(/1120S?|1065|1040|990/)[0];
+                            }
+                        }
+                        // Business name
+                        else if (label.includes("NAME") && (label.includes("SHOWN") || label.includes("RETURN"))) {
                             data.business_name = value;
-                        } else if (label.includes("ADDRESS")) {
+                        }
+                        // Address
+                        else if (label.includes("ADDRESS") && !label.includes("FOREIGN")) {
                             data.address = value;
                         }
                     }
                 });
+                
+                // Ensure we have valid data
+                if (!data.form_type) {
+                    // Try to detect form type from content
+                    const bodyText = doc.body.textContent;
+                    if (bodyText.includes("S CORPORATION")) {
+                        data.form_type = "1120S";
+                    } else if (bodyText.includes("C CORPORATION")) {
+                        data.form_type = "1120";
+                    } else if (bodyText.includes("PARTNERSHIP")) {
+                        data.form_type = "1065";
+                    }
+                }
                 
                 return data;
             }
@@ -372,14 +437,33 @@
                         const label = cells[0].textContent.trim().replace(':', '').toUpperCase();
                         const valueText = cells[1].textContent.trim();
                         
+                        // Direct field mapping
                         for (const [transcriptField, dataField] of Object.entries(fieldMap)) {
-                            if (label.includes(transcriptField)) {
+                            if (label === transcriptField || label.includes(transcriptField)) {
                                 const value = this.parseValue(valueText);
                                 if (value !== null) {
                                     data[dataField] = value;
                                 }
                                 break;
                             }
+                        }
+                        
+                        // Also check for common variations
+                        if (label.includes("GROSS RECEIPTS") || label.includes("TOTAL RECEIPTS")) {
+                            const value = this.parseValue(valueText);
+                            if (value !== null) data.gross_receipts = value;
+                        }
+                        else if (label.includes("ORDINARY BUSINESS INCOME") || label.includes("ORDINARY INCOME")) {
+                            const value = this.parseValue(valueText);
+                            if (value !== null) data.ordinary_income_loss = value;
+                        }
+                        else if (label.includes("TOTAL ASSETS") && label.includes("END")) {
+                            const value = this.parseValue(valueText);
+                            if (value !== null) data.total_assets_eoy = value;
+                        }
+                        else if (label.includes("SALARIES") || label.includes("WAGES")) {
+                            const value = this.parseValue(valueText);
+                            if (value !== null && !data.wages) data.wages = value;
                         }
                     }
                 });
@@ -775,28 +859,60 @@
                 return;
             }
             
-            // Process each uploaded transcript
-            state.uploadedTranscripts.forEach(transcript => {
-                const business = {
-                    id: Date.now() + Math.random(),
+            // Check if business already exists
+            let business = state.businesses.find(b => b.ein === ein);
+            
+            if (!business) {
+                // Create new business entry
+                business = {
+                    id: Date.now(),
                     ein,
                     businessName,
-                    ...transcript.data,
-                    riskAssessment: transcript.riskAssessment,
+                    transcripts: [],
                     uploadedBy: state.currentUser.email,
                     uploadedAt: new Date().toISOString(),
                     status: 'verified'
                 };
-                
                 state.businesses.push(business);
+            }
+            
+            // Add transcripts to the business
+            state.uploadedTranscripts.forEach(transcript => {
+                // Check if transcript for this period already exists
+                const existingIndex = business.transcripts.findIndex(t => 
+                    t.data.tax_period === transcript.data.tax_period
+                );
                 
-                // Update queue item if exists
-                const queueItem = state.queue.find(q => q.ein === ein);
-                if (queueItem) {
-                    queueItem.status = 'completed';
-                    queueItem.completedAt = new Date().toISOString();
+                if (existingIndex >= 0) {
+                    // Update existing transcript
+                    business.transcripts[existingIndex] = transcript;
+                } else {
+                    // Add new transcript
+                    business.transcripts.push(transcript);
                 }
             });
+            
+            // Calculate overall risk assessment based on latest transcript
+            const latestTranscript = business.transcripts.sort((a, b) => 
+                (b.data.tax_period || '').localeCompare(a.data.tax_period || '')
+            )[0];
+            
+            if (latestTranscript) {
+                business.riskAssessment = latestTranscript.riskAssessment;
+                // Copy key fields to business level for easy display
+                business.gross_receipts = latestTranscript.data.gross_receipts;
+                business.ordinary_income_loss = latestTranscript.data.ordinary_income_loss;
+                business.tax_period = latestTranscript.data.tax_period;
+                business.tax_period_formatted = latestTranscript.data.tax_period_formatted;
+                business.form_type = latestTranscript.data.form_type;
+            }
+            
+            // Update queue item if exists
+            const queueItem = state.queue.find(q => q.ein === ein);
+            if (queueItem) {
+                queueItem.status = 'completed';
+                queueItem.completedAt = new Date().toISOString();
+            }
             
             saveBusinesses();
             saveQueue();
@@ -806,7 +922,7 @@
             document.getElementById('extractedFields').classList.add('hidden');
             state.uploadedTranscripts = [];
             
-            alert('Business data uploaded successfully!');
+            alert(`Successfully uploaded ${business.transcripts.length} transcript(s) for ${businessName}`);
             updateAdminQueue();
         }
 
@@ -899,10 +1015,13 @@
             }
             
             portfolioList.innerHTML = verifiedBusinesses.map(business => {
-                const risk = business.riskAssessment;
+                const risk = business.riskAssessment || { risk_level: 'LOW', risk_score: 0 };
                 const riskColorClass = risk.risk_level === 'HIGH' ? 'bg-red-100 text-red-800' : 
                                       risk.risk_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
                                       'bg-green-100 text-green-800';
+                
+                // Get transcript count
+                const transcriptCount = business.transcripts ? business.transcripts.length : 1;
                 
                 return `
                     <div class="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="showBusinessDetails('${business.id}')">
@@ -910,6 +1029,7 @@
                             <div>
                                 <h4 class="font-medium text-lg">${business.businessName}</h4>
                                 <p class="text-sm text-gray-600">EIN: ${business.ein}</p>
+                                <p class="text-xs text-gray-500">${transcriptCount} transcript(s) available</p>
                             </div>
                             <span class="px-3 py-1 rounded-full text-sm font-medium ${riskColorClass}">
                                 ${risk.risk_level} RISK (${risk.risk_score}/100)
@@ -974,9 +1094,87 @@
             const business = state.businesses.find(b => b.id == businessId);
             if (!business) return;
             
-            // For now, just alert with details
-            // In production, this would open a modal or navigate to a detail page
-            alert(`Business Details:\n\n${JSON.stringify(business, null, 2)}`);
+            let detailsHTML = `
+                <h3 class="text-xl font-bold mb-4">${business.businessName}</h3>
+                <p class="text-gray-600 mb-4">EIN: ${business.ein}</p>
+            `;
+            
+            if (business.transcripts && business.transcripts.length > 0) {
+                detailsHTML += `<h4 class="font-semibold mb-3">Available Transcripts:</h4>`;
+                
+                // Sort transcripts by tax period
+                const sortedTranscripts = [...business.transcripts].sort((a, b) => 
+                    (b.data.tax_period || '').localeCompare(a.data.tax_period || '')
+                );
+                
+                sortedTranscripts.forEach(transcript => {
+                    const data = transcript.data;
+                    const risk = transcript.riskAssessment;
+                    
+                    detailsHTML += `
+                        <div class="border rounded-lg p-4 mb-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h5 class="font-medium">
+                                    ${data.form_type || 'Unknown Form'} - ${data.tax_period_formatted || data.tax_period || 'N/A'}
+                                </h5>
+                                <span class="px-2 py-1 rounded text-xs font-medium ${
+                                    risk.risk_level === 'HIGH' ? 'bg-red-100 text-red-800' : 
+                                    risk.risk_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 
+                                    'bg-green-100 text-green-800'
+                                }">
+                                    ${risk.risk_level} (${risk.risk_score}/100)
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Gross Receipts:</span>
+                                    <span class="ml-2 font-medium">${formatCurrency(data.gross_receipts)}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Operating Income:</span>
+                                    <span class="ml-2 font-medium ${(data.ordinary_income_loss || 0) < 0 ? 'text-red-600' : 'text-green-600'}">
+                                        ${formatCurrency(data.ordinary_income_loss)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Total Assets:</span>
+                                    <span class="ml-2 font-medium">${formatCurrency(data.total_assets_eoy)}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Est. Tax Exposure:</span>
+                                    <span class="ml-2 font-medium">${formatCurrency(risk.estimated_tax_exposure?.total_estimate || 0)}</span>
+                                </div>
+                            </div>
+                            
+                            ${risk.risk_factors.length > 0 ? `
+                                <div class="mt-3 text-sm">
+                                    <span class="font-medium">Risk Factors:</span>
+                                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                                        ${risk.risk_factors.map(f => `<li>${f}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                // Legacy format for businesses without transcript array
+                detailsHTML += `<pre class="bg-gray-100 p-4 rounded overflow-auto text-xs">${JSON.stringify(business, null, 2)}</pre>`;
+            }
+            
+            // Show in alert for now - in production this would be a modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-auto p-6">
+                    ${detailsHTML}
+                    <button onclick="this.closest('.fixed').remove()" class="mt-4 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">
+                        Close
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         // Utility Functions
