@@ -3,1344 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClearFirm Business Intelligence Portal</title>
+    <title>ClearFirm - Business Intelligence Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
-        .gradient-text {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        :root {
+            --clearfirm-green: #6B7B3A;
+            --clearfirm-ocean: #071F52;
         }
-        .loading-spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #1f2937;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--clearfirm-green) 0%, var(--clearfirm-ocean) 100%);
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .btn-primary {
+            background-color: var(--clearfirm-green);
+            color: white;
         }
-        .risk-low { background-color: #10b981; }
-        .risk-medium { background-color: #f59e0b; }
-        .risk-high { background-color: #ef4444; }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        .btn-primary:hover {
+            background-color: #5a6a32;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Brand colors based on ClearFirm guidelines */
-        .clearfirm-green { color: #6B7B3A; }
-        .clearfirm-green-bg { background-color: #6B7B3A; }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Main App Container -->
-    <div id="app" class="min-h-screen">
-        <!-- Login Screen -->
-        <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-            <!-- Background pattern -->
-            <div class="absolute inset-0 opacity-5">
-                <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239CA3AF" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-            </div>
-            
-            <div class="max-w-md w-full space-y-8 p-8 relative z-10">
-                <div class="text-center">
-                    <div class="flex items-center justify-center mb-6">
-                        <!-- ClearFirm Logo from brand assets -->
-                        <div class="relative">
-                            <svg width="280" height="80" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg">
-                                <!-- "Clear" in light weight -->
-                                <text x="0" y="60" font-family="'Helvetica Neue', Arial, sans-serif" font-size="58" font-weight="200" fill="#1a1a1a" letter-spacing="-1">
-                                    Clear
-                                </text>
-                                <!-- "Firm" in bold weight -->
-                                <text x="138" y="60" font-family="'Helvetica Neue', Arial, sans-serif" font-size="58" font-weight="700" fill="#1a1a1a" letter-spacing="-1">
-                                    Firm
-                                </text>
-                            </svg>
-                            <!-- Decorative element -->
-                            <div class="absolute -bottom-2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-                        </div>
-                    </div>
-                    <h2 class="text-3xl font-light text-gray-900 tracking-tight">Business Intelligence Portal</h2>
-                    <p class="mt-2 text-gray-600">Instant access to verified business data</p>
-                </div>
-                
-                <div class="bg-white shadow-xl rounded-lg p-8 border border-gray-100">
-                    <div class="mb-8">
-                        <div class="flex items-center justify-center space-x-2 mb-6">
-                            <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center shadow-sm">
-                                <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 text-center">Secure Portal Access</h3>
-                    </div>
-                    
-                    <form id="loginForm" class="space-y-6">
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                            <input id="email" name="email" type="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                        </div>
-                        
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                            <input id="password" name="password" type="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                        </div>
-                        
-                        <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"></div>
-                        
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
-                            Sign In to Portal
-                        </button>
-                    </form>
-                    
-                    <div class="mt-8 text-center">
-                        <div class="text-sm text-gray-600">
-                            <p>Need access? Contact your system administrator</p>
-                            <p class="mt-2">or email <a href="mailto:support@getclearfirm.com" class="text-gray-900 underline">support@getclearfirm.com</a></p>
-                        </div>
-                        
-                        <!-- Trust indicators -->
-                        <div class="mt-8 pt-8 border-t border-gray-200">
-                            <div class="flex items-center justify-center space-x-6 text-xs text-gray-500">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    Bank-level Security
-                                </div>
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    SOC 2 Compliant
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Dashboard (Hidden by default) -->
-        <div id="mainDashboard" class="hidden">
-            <!-- Header -->
-            <header class="bg-white shadow-sm border-b">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center justify-between h-16">
-                        <div class="flex items-center">
-                            <div class="text-black">
-                                <svg width="120" height="32" viewBox="0 0 240 64" xmlns="http://www.w3.org/2000/svg">
-                                    <text x="0" y="48" font-family="'Helvetica Neue', Arial, sans-serif" font-size="48" font-weight="200" fill="#1a1a1a" letter-spacing="-1">
-                                        Clear
-                                    </text>
-                                    <text x="115" y="48" font-family="'Helvetica Neue', Arial, sans-serif" font-size="48" font-weight="700" fill="#1a1a1a" letter-spacing="-1">
-                                        Firm
-                                    </text>
-                                </svg>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-4">
-                            <div id="userInfo" class="text-sm text-gray-700"></div>
-                            <button id="logoutBtn" class="text-sm text-gray-600 hover:text-gray-900">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Main Content -->
-            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <!-- Tab Navigation -->
-                <div class="border-b border-gray-200 mb-8">
-                    <nav class="-mb-px flex space-x-8">
-                        <button class="tab-btn active py-2 px-1 border-b-2 font-medium text-sm" data-tab="search">
-                            Business Search
-                        </button>
-                        <button class="tab-btn py-2 px-1 border-b-2 font-medium text-sm" data-tab="requests">
-                            Request Queue
-                        </button>
-                        <button class="tab-btn py-2 px-1 border-b-2 font-medium text-sm" data-tab="portfolio">
-                            Portfolio Dashboard
-                        </button>
-                        <button class="tab-btn py-2 px-1 border-b-2 font-medium text-sm" data-tab="billing">
-                            Billing & Usage
-                        </button>
-                        <button id="adminTab" class="tab-btn py-2 px-1 border-b-2 font-medium text-sm hidden" data-tab="admin">
-                            Admin Panel
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Tab Content -->
-                <div id="searchTab" class="tab-content">
-                    <div class="max-w-2xl mx-auto">
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h2 class="text-xl font-bold text-gray-900 mb-6">Business Intelligence Search</h2>
-                            
-                            <form id="searchForm" class="space-y-4">
-                                <div>
-                                    <label for="ein" class="block text-sm font-medium text-gray-700">EIN (Employer Identification Number)</label>
-                                    <input type="text" id="ein" name="ein" placeholder="XX-XXXXXXX" maxlength="10" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name (Optional)</label>
-                                    <input type="text" id="businessName" name="businessName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
-                                
-                                <div id="searchError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"></div>
-                                
-                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                    Search Business
-                                </button>
-                            </form>
-                            
-                            <div id="searchResults" class="mt-6 hidden"></div>
-                        </div>
-                        
-                        <!-- Available Sample Businesses -->
-                        <div class="mt-8 bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Sample Businesses Available</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="border rounded-lg p-4 cursor-pointer hover:bg-gray-50" onclick="quickSearch('XX-XXX2375', 'Star Discount Pharmacy')">
-                                    <h4 class="font-semibold">Star Discount Pharmacy</h4>
-                                    <p class="text-sm text-gray-600">EIN: XX-XXX2375</p>
-                                    <span class="inline-block px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded mt-2">LOW RISK</span>
-                                </div>
-                                
-                                <div class="border rounded-lg p-4 cursor-pointer hover:bg-gray-50" onclick="quickSearch('XX-XXX9460', 'MANA GROUP PHARMACIES LLC')">
-                                    <h4 class="font-semibold">MANA GROUP PHARMACIES LLC</h4>
-                                    <p class="text-sm text-gray-600">EIN: XX-XXX9460</p>
-                                    <span class="inline-block px-2 py-1 text-xs font-semibold text-red-800 bg-red-200 rounded mt-2">HIGH RISK</span>
-                                </div>
-                                
-                                <div class="border rounded-lg p-4 cursor-pointer hover:bg-gray-50" onclick="quickSearch('XX-XXX4555', 'D&B Pharmacy Corporation')">
-                                    <h4 class="font-semibold">D&B Pharmacy Corporation</h4>
-                                    <p class="text-sm text-gray-600">EIN: XX-XXX4555</p>
-                                    <span class="inline-block px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded mt-2">MEDIUM RISK</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="requestsTab" class="tab-content hidden">
-                    <div class="bg-white shadow rounded-lg">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-xl font-bold text-gray-900">Request Queue</h2>
-                            <p class="text-sm text-gray-600 mt-1">Real-time status of business verification requests</p>
-                        </div>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EIN</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="requestsTableBody" class="bg-white divide-y divide-gray-200">
-                                    <!-- Requests will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="portfolioTab" class="tab-content hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-sm font-medium text-gray-500">Total Verifications</h3>
-                            <p class="mt-2 text-3xl font-bold text-gray-900" id="totalVerifications">0</p>
-                            <p class="mt-1 text-sm text-gray-600">This month</p>
-                        </div>
-                        
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-sm font-medium text-gray-500">Credits Remaining</h3>
-                            <p class="mt-2 text-3xl font-bold text-gray-900" id="creditsRemaining">100</p>
-                            <p class="mt-1 text-sm text-gray-600">8 credits = 1 verification</p>
-                        </div>
-                        
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-sm font-medium text-gray-500">Average Risk Score</h3>
-                            <p class="mt-2 text-3xl font-bold text-gray-900" id="avgRiskScore">61</p>
-                            <p class="mt-1 text-sm text-gray-600">Across portfolio</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Portfolio Analytics -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Risk Distribution</h3>
-                            <canvas id="riskChart" width="400" height="200"></canvas>
-                        </div>
-                        
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Industry Breakdown</h3>
-                            <canvas id="industryChart" width="400" height="200"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="billingTab" class="tab-content hidden">
-                    <div class="max-w-4xl mx-auto">
-                        <div class="bg-white shadow rounded-lg p-6 mb-6">
-                            <h2 class="text-xl font-bold text-gray-900 mb-6">Current Plan & Usage</h2>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h3 class="text-lg font-semibold mb-4">Plan Details</h3>
-                                    <div class="space-y-3">
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Current Plan:</span>
-                                            <span class="font-semibold">Business Pro (100/month)</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Monthly Cost:</span>
-                                            <span class="font-semibold">$999.00</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Trial Status:</span>
-                                            <span class="font-semibold text-green-600">Active (5 days remaining)</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Next Billing Date:</span>
-                                            <span class="font-semibold">July 3, 2025</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <h3 class="text-lg font-semibold mb-4">Usage This Month</h3>
-                                    <div class="space-y-3">
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Verifications Used:</span>
-                                            <span class="font-semibold">6 / 100</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Credits Used:</span>
-                                            <span class="font-semibold">48 / 800</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">API Calls:</span>
-                                            <span class="font-semibold">124</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Stripe Integration -->
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold mb-4">Upgrade Your Plan</h3>
-                            <p class="text-gray-600 mb-6">Need more verifications? Upgrade to a higher tier plan.</p>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="border rounded-lg p-4">
-                                    <h4 class="font-semibold">Starter</h4>
-                                    <p class="text-2xl font-bold mt-2">$499<span class="text-sm font-normal">/month</span></p>
-                                    <p class="text-sm text-gray-600 mt-1">25 verifications</p>
-                                </div>
-                                
-                                <div class="border-2 border-gray-800 rounded-lg p-4">
-                                    <h4 class="font-semibold">Business Pro</h4>
-                                    <span class="text-xs bg-gray-800 text-white px-2 py-1 rounded">CURRENT</span>
-                                    <p class="text-2xl font-bold mt-2">$999<span class="text-sm font-normal">/month</span></p>
-                                    <p class="text-sm text-gray-600 mt-1">100 verifications</p>
-                                </div>
-                                
-                                <div class="border rounded-lg p-4">
-                                    <h4 class="font-semibold">Enterprise</h4>
-                                    <p class="text-2xl font-bold mt-2">$4,999<span class="text-sm font-normal">/month</span></p>
-                                    <p class="text-sm text-gray-600 mt-1">1,000 verifications</p>
-                                    <button class="mt-4 w-full bg-gray-800 text-white py-2 rounded hover:bg-gray-900">Upgrade</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="adminTabContent" class="tab-content hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Upload HTML Files -->
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload HTML Source Files</h3>
-                            <form id="uploadForm" class="space-y-4">
-                                <div>
-                                    <label for="uploadEin" class="block text-sm font-medium text-gray-700">Business EIN</label>
-                                    <input type="text" id="uploadEin" name="ein" placeholder="XX-XXXXXXX" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
-                                    <input type="text" id="businessName" name="businessName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="htmlContent" class="block text-sm font-medium text-gray-700">Paste HTML File Content</label>
-                                    <textarea id="htmlContent" name="htmlContent" rows="8" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 font-mono text-xs" placeholder="Paste the entire HTML file content here..."></textarea>
-                                    <p class="mt-1 text-xs text-gray-500">Paste the complete HTML source file from your expert network</p>
-                                </div>
-                                
-                                <div class="space-y-2">
-                                    <label class="block text-sm font-medium text-gray-700">Or Upload HTML File</label>
-                                    <input type="file" id="htmlFile" accept=".html,.htm" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
-                                </div>
-                                
-                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                    Process HTML Data
-                                </button>
-                            </form>
-                        </div>
-                        
-                        <!-- Data Extraction Preview -->
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Data Extraction Preview</h3>
-                            <div id="extractionPreview" class="space-y-4">
-                                <p class="text-sm text-gray-600">Upload an HTML file to see extracted data fields</p>
-                                
-                                <div class="hidden" id="extractedFields">
-                                    <h4 class="font-medium text-sm mb-2">Extracted Fields:</h4>
-                                    <div class="bg-gray-50 p-3 rounded text-xs space-y-1 max-h-64 overflow-auto">
-                                        <!-- Extracted data will appear here -->
-                                    </div>
-                                    
-                                    <div class="mt-4 space-y-3">
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-700">Risk Level</label>
-                                            <select id="manualRiskLevel" class="mt-1 block w-full px-2 py-1 text-sm border border-gray-300 rounded">
-                                                <option>AUTO-DETECT</option>
-                                                <option>LOW RISK</option>
-                                                <option>MEDIUM RISK</option>
-                                                <option>MEDIUM-HIGH RISK</option>
-                                                <option>HIGH RISK</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <button onclick="createBusinessProfile()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 text-sm">
-                                            Create Business Profile
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Processing Queue -->
-                    <div class="mt-6 bg-white shadow rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Processing Queue</h3>
-                        <div id="processingQueue" class="space-y-2">
-                            <p class="text-sm text-gray-600">No files being processed</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Recently Added Businesses -->
-                    <div class="mt-6 bg-white shadow rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recently Added Businesses</h3>
-                        <div id="recentBusinesses" class="space-y-2">
-                            <!-- Will be populated dynamically -->
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <!-- Business Analysis Modal -->
-        <div id="analysisModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 overflow-y-auto">
-            <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-6">
-                            <h2 class="text-2xl font-bold text-gray-900" id="modalBusinessName"></h2>
-                            <button onclick="closeAnalysisModal()" class="text-gray-400 hover:text-gray-500">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <div id="analysisContent" class="space-y-6">
-                            <!-- Analysis content will be populated here -->
-                        </div>
-                        
-                        <div class="mt-6 flex justify-end space-x-3">
-                            <button onclick="exportReport('pdf')" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">
-                                Export PDF
-                            </button>
-                            <button onclick="exportReport('excel')" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                                Export Excel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="app"></div>
 
     <script>
-        // Application State
-        let currentUser = null;
-        let requests = [];
-        let verifications = [];
-        let credits = 800; // 100 verifications * 8 credits each
+        // Configuration
+        const API_URL = 'https://clearfirm-api.onrender.com/api';
         
-        // Sample Business Data
-        const sampleBusinesses = {
-            '47-4030404': {
-                name: 'PSQUARED MEDICALS, INC',
-                ein: '47-4030404',
-                businessType: 'Corporation',
-                address: '4809 Argonne St Ste 155, Denver, CO 80249',
-                industry: 'Medical Services',
-                riskScore: 72,
-                riskLevel: 'MEDIUM RISK',
-                riskDescription: 'Established medical services provider with moderate risk profile',
-                criticalIndicators: [
-                    { type: 'success', title: 'Active Operations', description: 'Business actively operating in medical services sector' },
-                    { type: 'info', title: 'Colorado Registration', description: 'Properly registered in Colorado' },
-                    { type: 'warning', title: 'New to Platform', description: 'First-time verification on ClearFirm' }
-                ],
-                financialMetrics: {
-                    revenue2023: 2850000,
-                    revenue2022: 2400000,
-                    revenueChange: 18.75,
-                    operatingIncome2023: 285000,
-                    operatingIncome2022: 220000,
-                    operatingIncomeChange: 29.5,
-                    totalAssets2023: 1200000,
-                    totalAssets2022: 950000,
-                    assetsChange: 26.3,
-                    debtToAssetRatio: 35.5,
-                    liquidityScore: 68
-                },
-                payrollCompliance: {
-                    status: 'CURRENT',
-                    employeeCount: 28,
-                    totalPayroll2023: 1400000,
-                    payrollAsPercentRevenue: 49.1,
-                    lastFilingDate: '2025-06-15',
-                    complianceAlerts: []
-                },
-                recommendations: {
-                    creditLimit: 150000,
-                    requiredDocumentation: ['Current financial statements', 'Business licenses', 'Insurance verification'],
-                    riskFactors: ['High payroll ratio', 'Moderate debt levels'],
-                    positiveFactors: ['Revenue growth', 'Current compliance', 'Established operations'],
-                    terms: {
-                        interestRate: 'Prime + 2.5%',
-                        collateralRequired: 'Business assets',
-                        personalGuarantee: 'Required',
-                        covenants: ['Monthly financial reporting', 'Maintain insurance coverage']
+        // Simple router
+        class Router {
+            constructor() {
+                this.routes = {};
+                window.addEventListener('popstate', () => this.handleRoute());
+                document.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'A' && e.target.href.startsWith(window.location.origin)) {
+                        e.preventDefault();
+                        this.navigate(new URL(e.target.href).pathname);
                     }
-                }
-            },
-            '99-2296965': {
-                name: 'iTech LLC',
-                ein: '99-2296965',
-                businessType: 'Limited Liability Company',
-                address: '735 E Palmer Ave Apt 106, Glendale, CA 91205-4702',
-                industry: 'Technology Services',
-                riskScore: 65,
-                riskLevel: 'MEDIUM RISK',
-                riskDescription: 'Small technology services firm with limited operating history',
-                criticalIndicators: [
-                    { type: 'warning', title: 'Residential Address', description: 'Business registered to residential apartment' },
-                    { type: 'info', title: 'LLC Structure', description: 'Limited liability company in California' },
-                    { type: 'warning', title: 'Limited Credit History', description: 'Less than 3 years of financial data available' }
-                ],
-                financialMetrics: {
-                    revenue2023: 485000,
-                    revenue2022: 280000,
-                    revenueChange: 73.2,
-                    operatingIncome2023: 92000,
-                    operatingIncome2022: 45000,
-                    operatingIncomeChange: 104.4,
-                    totalAssets2023: 125000,
-                    totalAssets2022: 65000,
-                    assetsChange: 92.3,
-                    debtToAssetRatio: 22.5,
-                    liquidityScore: 58
-                },
-                payrollCompliance: {
-                    status: 'CURRENT',
-                    employeeCount: 3,
-                    totalPayroll2023: 195000,
-                    payrollAsPercentRevenue: 40.2,
-                    lastFilingDate: '2025-06-20',
-                    complianceAlerts: ['Home-based business']
-                },
-                recommendations: {
-                    creditLimit: 25000,
-                    requiredDocumentation: ['Bank statements', 'Client contracts', 'Owner personal guarantee', 'Business plan'],
-                    riskFactors: ['Home-based operation', 'Limited assets', 'Short operating history'],
-                    positiveFactors: ['Strong growth trajectory', 'Low debt', 'Tech sector opportunities'],
-                    terms: {
-                        interestRate: 'Prime + 4%',
-                        collateralRequired: 'All business assets',
-                        personalGuarantee: 'Required from all members',
-                        covenants: ['Weekly cash flow reporting', 'Client concentration limits', 'No distributions without approval']
-                    }
-                }
-            },
-            'XX-XXX2375': {
-                name: 'Star Discount Pharmacy Inc',
-                ein: 'XX-XXX2375',
-                businessType: 'S Corporation',
-                address: '1234 Main St, Huntsville, AL 35801',
-                industry: 'Pharmacy/Retail',
-                riskScore: 85,
-                riskLevel: 'LOW RISK',
-                riskDescription: 'Strong financial position with exceptional revenue growth',
-                criticalIndicators: [
-                    { type: 'success', title: 'Exceptional Revenue Growth', description: 'Revenue increased from $1.1M (2022) to $79.5M (2023)' },
-                    { type: 'success', title: 'Healthy Cash Flow', description: 'Operating income of $1.79M demonstrates strong profitability' },
-                    { type: 'info', title: 'Under IRS Examination', description: 'Currently under routine IRS examination - no adverse findings' }
-                ],
-                financialMetrics: {
-                    revenue2023: 79518635,
-                    revenue2022: 1100000,
-                    revenueChange: 7128.97,
-                    operatingIncome2023: 1790000,
-                    operatingIncome2022: 150000,
-                    operatingIncomeChange: 1093.33,
-                    totalAssets2023: 16500000,
-                    totalAssets2022: 2000000,
-                    assetsChange: 725,
-                    debtToAssetRatio: 15.2,
-                    liquidityScore: 92
-                },
-                payrollCompliance: {
-                    status: 'CURRENT',
-                    employeeCount: 145,
-                    totalPayroll2023: 5800000,
-                    payrollAsPercentRevenue: 7.3,
-                    lastFilingDate: '2025-06-15',
-                    complianceAlerts: []
-                },
-                recommendations: {
-                    creditLimit: 2500000,
-                    requiredDocumentation: ['Current balance sheet', 'Cash flow statement'],
-                    riskFactors: ['Rapid growth requires monitoring', 'IRS examination in progress'],
-                    positiveFactors: ['Strong profitability', 'Low debt ratio', 'Compliant payroll'],
-                    terms: {
-                        interestRate: 'Prime + 1.5%',
-                        collateralRequired: 'None',
-                        personalGuarantee: 'Not required',
-                        covenants: ['Maintain debt-to-asset ratio below 30%', 'Quarterly financial reporting']
-                    }
-                }
-            },
-            'XX-XXX9460': {
-                name: 'MANA GROUP PHARMACIES LLC',
-                ein: 'XX-XXX9460',
-                businessType: 'S Corporation',
-                address: '4441 Broadway, Management Plaza, Prosper, TX 75078',
-                industry: 'Pharmacy Management',
-                riskScore: 45,
-                riskLevel: 'HIGH RISK',
-                riskDescription: 'Declining performance with significant operating losses',
-                criticalIndicators: [
-                    { type: 'danger', title: 'Significant Operating Losses', description: 'Operating loss of $754K in 2023' },
-                    { type: 'danger', title: 'High Interest Burden', description: 'Interest expense of $262K indicates heavy debt load' },
-                    { type: 'warning', title: 'Bankruptcy Filed', description: 'Chapter 11 bankruptcy protection filed' },
-                    { type: 'warning', title: 'Multi-Shareholder Complexity', description: '4 shareholders may complicate decision-making' }
-                ],
-                financialMetrics: {
-                    revenue2023: 5200000,
-                    revenue2022: 5625000,
-                    revenueChange: -7.6,
-                    operatingIncome2023: -754456,
-                    operatingIncome2022: -647000,
-                    operatingIncomeChange: -16.6,
-                    totalAssets2023: 3200000,
-                    totalAssets2022: 3800000,
-                    assetsChange: -15.8,
-                    debtToAssetRatio: 82.5,
-                    liquidityScore: 31
-                },
-                payrollCompliance: {
-                    status: 'CURRENT',
-                    employeeCount: 48,
-                    totalPayroll2023: 1920000,
-                    payrollAsPercentRevenue: 36.9,
-                    lastFilingDate: '2025-06-10',
-                    complianceAlerts: ['High payroll-to-revenue ratio']
-                },
-                recommendations: {
-                    creditLimit: 50000,
-                    requiredDocumentation: ['Bankruptcy filing details', 'Restructuring plan', 'Personal guarantees from all shareholders'],
-                    riskFactors: ['Operating losses', 'Bankruptcy proceedings', 'High debt burden', 'Declining revenue'],
-                    positiveFactors: ['Current on payroll taxes', 'Maintaining operations'],
-                    terms: {
-                        interestRate: 'Prime + 6%',
-                        collateralRequired: 'All business assets',
-                        personalGuarantee: 'Required from all shareholders',
-                        covenants: ['Weekly cash flow reporting', 'No additional debt without approval', 'Maintain minimum cash balance']
-                    }
-                }
-            },
-            'XX-XXX4555': {
-                name: 'D&B Pharmacy Corporation',
-                ein: 'XX-XXX4555',
-                businessType: 'S Corporation',
-                address: '789 Oak St, South Salem, NY 10590',
-                industry: 'Pharmacy/Healthcare',
-                riskScore: 58,
-                riskLevel: 'MEDIUM-HIGH RISK',
-                riskDescription: 'Stable but modest revenue with consecutive operating losses',
-                criticalIndicators: [
-                    { type: 'warning', title: 'Consecutive Operating Losses', description: 'Operating losses for multiple years' },
-                    { type: 'success', title: 'Current Payroll Compliance', description: 'All payroll taxes filed on time' },
-                    { type: 'info', title: '7 Tax Documents', description: 'Complete tax filing history available' }
-                ],
-                financialMetrics: {
-                    revenue2023: 3065676,
-                    revenue2022: 2950000,
-                    revenueChange: 3.9,
-                    operatingIncome2023: -125000,
-                    operatingIncome2022: -180000,
-                    operatingIncomeChange: 30.6,
-                    totalAssets2023: 1800000,
-                    totalAssets2022: 1900000,
-                    assetsChange: -5.3,
-                    debtToAssetRatio: 45.2,
-                    liquidityScore: 52
-                },
-                payrollCompliance: {
-                    status: 'CURRENT',
-                    employeeCount: 22,
-                    totalPayroll2023: 990000,
-                    payrollAsPercentRevenue: 32.3,
-                    lastFilingDate: '2025-06-12',
-                    complianceAlerts: []
-                },
-                recommendations: {
-                    creditLimit: 75000,
-                    requiredDocumentation: ['Business turnaround plan', 'Monthly P&L statements', 'Personal financial statements'],
-                    riskFactors: ['Operating losses', 'Moderate debt levels', 'Thin margins'],
-                    positiveFactors: ['Revenue growth', 'Improving losses', 'Tax compliance'],
-                    terms: {
-                        interestRate: 'Prime + 3.5%',
-                        collateralRequired: 'Business inventory and receivables',
-                        personalGuarantee: 'Required from primary shareholder',
-                        covenants: ['Monthly financial reporting', 'Maintain positive working capital']
-                    }
-                }
+                });
+            }
+
+            addRoute(path, handler) {
+                this.routes[path] = handler;
+            }
+
+            navigate(path) {
+                window.history.pushState({}, '', path);
+                this.handleRoute();
+            }
+
+            handleRoute() {
+                const path = window.location.pathname;
+                const handler = this.routes[path] || this.routes['/'];
+                if (handler) handler();
+            }
+        }
+
+        const router = new Router();
+        const app = document.getElementById('app');
+
+        // Pages
+        const renderHome = () => {
+            app.innerHTML = `
+                <div class="min-h-screen">
+                    <nav class="bg-white shadow-sm">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="flex justify-between h-16">
+                                <div class="flex items-center">
+                                    <span class="text-2xl font-bold" style="color: var(--clearfirm-green)">ClearFirm</span>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <a href="/admin" class="text-gray-700 hover:text-gray-900">Admin</a>
+                                    <a href="/login" class="text-gray-700 hover:text-gray-900">Login</a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                    <div class="gradient-bg text-white py-20">
+                        <div class="max-w-7xl mx-auto px-4 text-center">
+                            <h1 class="text-4xl md:text-6xl font-bold mb-4">
+                                Business Intelligence Made Simple
+                            </h1>
+                            <p class="text-xl mb-8">Verify any business instantly</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderAdmin = () => {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center">
+                        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+                            <h2 class="text-2xl font-bold mb-6">Admin Login</h2>
+                            <form id="adminLoginForm">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" id="email" required class="w-full px-3 py-2 border rounded-md">
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                    <input type="password" id="password" required class="w-full px-3 py-2 border rounded-md">
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">
+                                    Login
+                                </button>
+                            </form>
+                            <p class="text-sm text-center mt-4">
+                                <a href="/" class="text-blue-600 hover:underline">Back to Home</a>
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    document.getElementById('adminLoginForm')?.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const email = document.getElementById('email').value;
+                        const password = document.getElementById('password').value;
+                        
+                        try {
+                            const response = await fetch(`${API_URL}/auth/login`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email, password })
+                            });
+                            
+                            const data = await response.json();
+                            if (response.ok && data.user.is_admin) {
+                                localStorage.setItem('adminToken', data.token);
+                                localStorage.setItem('adminUser', JSON.stringify(data.user));
+                                renderAdminDashboard();
+                            } else {
+                                alert('Admin access required');
+                            }
+                        } catch (error) {
+                            alert('Login failed');
+                        }
+                    });
+                }, 100);
+            } else {
+                renderAdminDashboard();
             }
         };
 
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check for existing session
-            const savedUser = localStorage.getItem('clearfirm_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showDashboard();
-            }
-            
-            // Setup event listeners
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('searchForm').addEventListener('submit', handleSearch);
-            document.getElementById('uploadForm').addEventListener('submit', handleUpload);
-            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-            
-            // Tab navigation
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    switchTab(this.getAttribute('data-tab'));
-                });
-            });
-            
-            // EIN formatting
-            document.getElementById('ein').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 2) {
-                    value = value.slice(0, 2) + '-' + value.slice(2, 9);
-                }
-                e.target.value = value;
-            });
-        });
-
-        // Authentication Functions
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // Simple authentication (in production, this would validate against a backend)
-            if (email === 'joseph@affiniti.com' && password === 'demo123') {
-                currentUser = {
-                    id: 1,
-                    name: 'Joseph Pabst',
-                    email: email,
-                    company: 'Affiniti Finance',
-                    role: 'Head of Credit',
-                    isAdmin: false,
-                    planType: 'business_pro',
-                    trialEndsAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) // 5 days from now
-                };
-            } else if (email === 'matt@getclearfirm.com' && password === 'admin123') {
-                currentUser = {
-                    id: 2,
-                    name: 'Matt Parker',
-                    email: email,
-                    company: 'ClearFirm',
-                    role: 'Admin',
-                    isAdmin: true,
-                    planType: 'enterprise',
-                    trialEndsAt: null
-                };
-            } else {
-                showError('loginError', 'Invalid email or password');
-                return;
-            }
-            
-            localStorage.setItem('clearfirm_user', JSON.stringify(currentUser));
-            showDashboard();
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('clearfirm_user');
-            currentUser = null;
-            location.reload();
-        }
-
-        function showDashboard() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainDashboard').classList.remove('hidden');
-            
-            // Update user info
-            document.getElementById('userInfo').textContent = `${currentUser.name} • ${currentUser.company}`;
-            
-            // Show admin tab if admin
-            if (currentUser.isAdmin) {
-                document.getElementById('adminTab').classList.remove('hidden');
-            }
-            
-            // Initialize dashboard data
-            updateDashboardStats();
-            initializeCharts();
-            loadRequests();
-        }
-
-        // Business Search Functions
-        function handleSearch(e) {
-            e.preventDefault();
-            const ein = document.getElementById('ein').value.replace('-', '');
-            const businessName = document.getElementById('businessName').value;
-            
-            if (!ein || ein.length !== 9) {
-                showError('searchError', 'Please enter a valid 9-digit EIN');
-                return;
-            }
-            
-            // Check if we have sample data
-            const formattedEin = ein.replace(/-/g, '') === ein ? 
-                ein.slice(0, 2) + '-' + ein.slice(2) : 
-                ein;
-            
-            if (sampleBusinesses[formattedEin] || sampleBusinesses[ein]) {
-                // Show immediate result
-                const business = sampleBusinesses[formattedEin] || sampleBusinesses[ein];
-                displaySearchResult(business);
-                
-                // Track verification
-                credits -= 8;
-                verifications.push({
-                    id: Date.now(),
-                    business: sampleBusinesses[formattedEin],
-                    timestamp: new Date()
-                });
-                updateDashboardStats();
-            } else {
-                // Submit to queue
-                const request = {
-                    id: Date.now(),
-                    ein: formattedEin,
-                    businessName: businessName || 'Unknown',
-                    status: 'pending',
-                    requestedAt: new Date(),
-                    requestedBy: currentUser.email
-                };
-                
-                requests.push(request);
-                showError('searchError', 'Business data not immediately available. Request has been submitted to the queue.', 'info');
-                switchTab('requests');
-                loadRequests();
-            }
-        }
-
-        function quickSearch(ein, businessName) {
-            document.getElementById('ein').value = ein;
-            document.getElementById('businessName').value = businessName;
-            document.getElementById('searchForm').dispatchEvent(new Event('submit'));
-        }
-
-        function displaySearchResult(business) {
-            const resultsDiv = document.getElementById('searchResults');
-            resultsDiv.innerHTML = `
-                <div class="border rounded-lg p-6 fade-in">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="text-xl font-bold">${business.name}</h3>
-                            <p class="text-gray-600">EIN: ${business.ein} • ${business.businessType}</p>
-                        </div>
-                        <span class="px-3 py-1 text-sm font-semibold rounded ${getRiskBadgeClass(business.riskLevel)}">
-                            ${business.riskLevel}
-                        </span>
-                    </div>
-                    
-                    <div class="grid grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <p class="text-sm text-gray-600">Risk Score</p>
-                            <p class="text-2xl font-bold">${business.riskScore}/100</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">2023 Revenue</p>
-                            <p class="text-2xl font-bold">$${formatNumber(business.financialMetrics.revenue2023)}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Credit Limit</p>
-                            <p class="text-2xl font-bold">$${formatNumber(business.recommendations.creditLimit)}</p>
-                        </div>
-                    </div>
-                    
-                    <button onclick="showFullAnalysis('${business.ein}')" class="w-full bg-gray-800 text-white py-2 rounded hover:bg-gray-900">
-                        View Full Analysis
-                    </button>
-                </div>
-            `;
-            resultsDiv.classList.remove('hidden');
-        }
-
-        function showFullAnalysis(ein) {
-            const business = sampleBusinesses[ein];
-            if (!business) return;
-            
-            document.getElementById('modalBusinessName').textContent = business.name;
-            
-            const content = document.getElementById('analysisContent');
-            content.innerHTML = `
-                <!-- Overview -->
-                <div class="border-b pb-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-gray-600">EIN: ${business.ein} • ${business.businessType}</p>
-                            <p class="text-gray-600">${business.address}</p>
-                            <p class="text-gray-600">Industry: ${business.industry}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="px-4 py-2 text-lg font-semibold rounded ${getRiskBadgeClass(business.riskLevel)}">
-                                ${business.riskLevel}
-                            </span>
-                            <p class="mt-2 text-3xl font-bold">${business.riskScore}/100</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-700">${business.riskDescription}</p>
-                </div>
-                
-                <!-- Critical Indicators -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-3">Critical Risk Indicators</h3>
-                    <div class="space-y-3">
-                        ${business.criticalIndicators.map(indicator => `
-                            <div class="flex items-start space-x-3 p-3 rounded ${getIndicatorClass(indicator.type)}">
-                                <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    ${getIndicatorIcon(indicator.type)}
-                                </svg>
-                                <div>
-                                    <p class="font-semibold">${indicator.title}</p>
-                                    <p class="text-sm">${indicator.description}</p>
-                                </div>
+        const renderAdminDashboard = () => {
+            app.innerHTML = `
+                <div class="min-h-screen bg-gray-100">
+                    <header class="bg-white border-b">
+                        <div class="max-w-7xl mx-auto px-4 py-4">
+                            <div class="flex justify-between">
+                                <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+                                <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
                             </div>
-                        `).join('')}
-                    </div>
+                        </div>
+                    </header>
+                    <main class="max-w-7xl mx-auto px-4 py-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h2 class="text-lg font-semibold mb-4">Welcome to Admin Dashboard</h2>
+                            <p>Full admin functionality coming soon...</p>
+                        </div>
+                    </main>
                 </div>
-                
-                <!-- Financial Analysis -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-3">Financial Analysis</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-gray-50 p-4 rounded">
-                            <h4 class="font-semibold mb-2">Revenue Trends</h4>
-                            <p>2023: $${formatNumber(business.financialMetrics.revenue2023)}</p>
-                            <p>2022: $${formatNumber(business.financialMetrics.revenue2022)}</p>
-                            <p class="${business.financialMetrics.revenueChange > 0 ? 'text-green-600' : 'text-red-600'} font-semibold">
-                                ${business.financialMetrics.revenueChange > 0 ? '+' : ''}${business.financialMetrics.revenueChange.toFixed(1)}% YoY
-                            </p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded">
-                            <h4 class="font-semibold mb-2">Operating Income</h4>
-                            <p>2023: $${formatNumber(business.financialMetrics.operatingIncome2023)}</p>
-                            <p>2022: $${formatNumber(business.financialMetrics.operatingIncome2022)}</p>
-                            <p class="${business.financialMetrics.operatingIncomeChange > 0 ? 'text-green-600' : 'text-red-600'} font-semibold">
-                                ${business.financialMetrics.operatingIncomeChange > 0 ? '+' : ''}${business.financialMetrics.operatingIncomeChange.toFixed(1)}% YoY
-                            </p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded">
-                            <h4 class="font-semibold mb-2">Asset Metrics</h4>
-                            <p>Total Assets: $${formatNumber(business.financialMetrics.totalAssets2023)}</p>
-                            <p>Debt-to-Asset Ratio: ${business.financialMetrics.debtToAssetRatio}%</p>
-                            <p>Liquidity Score: ${business.financialMetrics.liquidityScore}/100</p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded">
-                            <h4 class="font-semibold mb-2">Payroll Compliance</h4>
-                            <p>Status: <span class="font-semibold ${business.payrollCompliance.status === 'CURRENT' ? 'text-green-600' : 'text-red-600'}">${business.payrollCompliance.status}</span></p>
-                            <p>Employees: ${business.payrollCompliance.employeeCount}</p>
-                            <p>Payroll/Revenue: ${business.payrollCompliance.payrollAsPercentRevenue}%</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Underwriting Recommendations -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-3">Underwriting Recommendations</h3>
-                    <div class="bg-blue-50 p-4 rounded mb-4">
-                        <p class="text-lg font-semibold">Recommended Credit Limit: $${formatNumber(business.recommendations.creditLimit)}</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 class="font-semibold text-red-700 mb-2">Risk Factors</h4>
-                            <ul class="list-disc list-inside text-sm space-y-1">
-                                ${business.recommendations.riskFactors.map(factor => `<li>${factor}</li>`).join('')}
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-green-700 mb-2">Positive Factors</h4>
-                            <ul class="list-disc list-inside text-sm space-y-1">
-                                ${business.recommendations.positiveFactors.map(factor => `<li>${factor}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h4 class="font-semibold mb-2">Recommended Terms</h4>
-                        <div class="bg-gray-50 p-4 rounded space-y-2 text-sm">
-                            <p><span class="font-semibold">Interest Rate:</span> ${business.recommendations.terms.interestRate}</p>
-                            <p><span class="font-semibold">Collateral:</span> ${business.recommendations.terms.collateralRequired}</p>
-                            <p><span class="font-semibold">Personal Guarantee:</span> ${business.recommendations.terms.personalGuarantee}</p>
-                            <p><span class="font-semibold">Covenants:</span></p>
-                            <ul class="list-disc list-inside ml-4">
-                                ${business.recommendations.terms.covenants.map(covenant => `<li>${covenant}</li>`).join('')}
-                            </ul>
-                        </div>
+            `;
+        };
+
+        const renderLogin = () => {
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center">
+                    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+                        <h2 class="text-2xl font-bold mb-6">Login</h2>
+                        <form id="loginForm">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="email" required class="w-full px-3 py-2 border rounded-md">
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="password" required class="w-full px-3 py-2 border rounded-md">
+                            </div>
+                            <button type="submit" class="w-full btn-primary py-2 rounded-md">Login</button>
+                        </form>
+                        <p class="text-sm text-center mt-4">
+                            <a href="/" class="text-green-600 hover:underline">Back to Home</a>
+                        </p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('analysisModal').classList.remove('hidden');
-        }
-
-        function closeAnalysisModal() {
-            document.getElementById('analysisModal').classList.add('hidden');
-        }
-
-        // Tab Navigation
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-gray-900', 'text-gray-900');
-                btn.classList.add('border-transparent', 'text-gray-500');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName + 'Tab').classList.remove('hidden');
-            
-            // Add active class to selected button
-            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            activeBtn.classList.remove('border-transparent', 'text-gray-500');
-            activeBtn.classList.add('border-gray-900', 'text-gray-900');
-            
-            // Load data for specific tabs
-            if (tabName === 'requests') {
-                loadRequests();
-            } else if (tabName === 'admin') {
-                loadAdminQueue();
-            }
-        }
-
-        // Request Queue Functions
-        function loadRequests() {
-            const tbody = document.getElementById('requestsTableBody');
-            tbody.innerHTML = '';
-            
-            if (requests.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">No requests in queue</td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            requests.forEach(request => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">#${request.id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${request.businessName}</td>
-                    <td class="px-6 py-4 whitespace-nowrap font-mono">${request.ein}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-semibold rounded ${getStatusBadgeClass(request.status)}">
-                            ${request.status.toUpperCase()}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${formatDate(request.requestedAt)}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        ${request.status === 'completed' ? 
-                            `<button onclick="viewRequestResult('${request.id}')" class="text-gray-600 hover:text-gray-900">View Result</button>` :
-                            '<span class="text-gray-400">Processing...</span>'
-                        }
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Admin Functions
-        function handleUpload(e) {
-            e.preventDefault();
-            const ein = document.getElementById('uploadEin').value;
-            const file = document.getElementById('htmlFile').files[0];
-            
-            if (!ein || !file) {
-                alert('Please provide both EIN and HTML file');
-                return;
-            }
-            
-            // Simulate file upload
-            alert(`Data uploaded for EIN: ${ein}`);
-            document.getElementById('uploadForm').reset();
-            
-            // Update any pending requests
-            const pendingRequest = requests.find(r => r.ein === ein && r.status === 'pending');
-            if (pendingRequest) {
-                pendingRequest.status = 'completed';
-                pendingRequest.completedAt = new Date();
-                loadRequests();
-                loadAdminQueue();
-            }
-        }
-
-        function loadAdminQueue() {
-            const queueDiv = document.getElementById('adminQueue');
-            const pendingRequests = requests.filter(r => r.status === 'pending');
-            
-            if (pendingRequests.length === 0) {
-                queueDiv.innerHTML = '<p class="text-gray-500">No pending requests</p>';
-                return;
-            }
-            
-            queueDiv.innerHTML = pendingRequests.map(request => `
-                <div class="border rounded p-3 bg-yellow-50">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-semibold">${request.businessName}</p>
-                            <p class="text-sm text-gray-600">EIN: ${request.ein}</p>
-                            <p class="text-xs text-gray-500">Requested by: ${request.requestedBy}</p>
-                        </div>
-                        <span class="text-xs text-gray-500">${formatDate(request.requestedAt)}</span>
-                    </div>
-                    <button onclick="alert('Source data from expert network for EIN: ${request.ein}')" 
-                            class="mt-2 text-sm bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700">
-                        Source Data
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Dashboard Functions
-        function updateDashboardStats() {
-            document.getElementById('totalVerifications').textContent = verifications.length;
-            document.getElementById('creditsRemaining').textContent = credits;
-            
-            // Calculate average risk score
-            if (verifications.length > 0) {
-                const avgScore = verifications.reduce((sum, v) => sum + v.business.riskScore, 0) / verifications.length;
-                document.getElementById('avgRiskScore').textContent = Math.round(avgScore);
-            }
-        }
-
-        function initializeCharts() {
-            // Risk Distribution Chart
-            const riskCtx = document.getElementById('riskChart').getContext('2d');
-            new Chart(riskCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
-                    datasets: [{
-                        data: [1, 1, 1],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-            
-            // Industry Breakdown Chart
-            const industryCtx = document.getElementById('industryChart').getContext('2d');
-            new Chart(industryCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Pharmacy', 'Healthcare', 'Medical Practice', 'Other'],
-                    datasets: [{
-                        label: 'Number of Businesses',
-                        data: [3, 0, 0, 0],
-                        backgroundColor: '#1f2937'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Utility Functions
-        function showError(elementId, message, type = 'error') {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.classList.remove('hidden', 'bg-red-50', 'bg-blue-50', 'text-red-700', 'text-blue-700');
-            
-            if (type === 'info') {
-                element.classList.add('bg-blue-50', 'text-blue-700');
-            } else {
-                element.classList.add('bg-red-50', 'text-red-700');
-            }
             
             setTimeout(() => {
-                element.classList.add('hidden');
-            }, 5000);
+                document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    
+                    try {
+                        const response = await fetch(`${API_URL}/auth/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+                        
+                        const data = await response.json();
+                        if (response.ok) {
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            alert('Login successful!');
+                            router.navigate('/');
+                        } else {
+                            alert(data.error || 'Login failed');
+                        }
+                    } catch (error) {
+                        alert('Login failed');
+                    }
+                });
+            }, 100);
+        };
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            router.navigate('/admin');
         }
 
-        function getRiskBadgeClass(riskLevel) {
-            switch (riskLevel) {
-                case 'LOW RISK':
-                    return 'bg-green-100 text-green-800';
-                case 'MEDIUM RISK':
-                case 'MEDIUM-HIGH RISK':
-                    return 'bg-yellow-100 text-yellow-800';
-                case 'HIGH RISK':
-                    return 'bg-red-100 text-red-800';
-                default:
-                    return 'bg-gray-100 text-gray-800';
-            }
-        }
+        // Set up routes
+        router.addRoute('/', renderHome);
+        router.addRoute('/admin', renderAdmin);
+        router.addRoute('/login', renderLogin);
 
-        function getStatusBadgeClass(status) {
-            switch (status) {
-                case 'pending':
-                    return 'bg-yellow-100 text-yellow-800';
-                case 'processing':
-                    return 'bg-blue-100 text-blue-800';
-                case 'completed':
-                    return 'bg-green-100 text-green-800';
-                case 'failed':
-                    return 'bg-red-100 text-red-800';
-                default:
-                    return 'bg-gray-100 text-gray-800';
-            }
-        }
-
-        function getIndicatorClass(type) {
-            switch (type) {
-                case 'success':
-                    return 'bg-green-50 text-green-700';
-                case 'warning':
-                    return 'bg-yellow-50 text-yellow-700';
-                case 'danger':
-                    return 'bg-red-50 text-red-700';
-                case 'info':
-                    return 'bg-blue-50 text-blue-700';
-                default:
-                    return 'bg-gray-50 text-gray-700';
-            }
-        }
-
-        function getIndicatorIcon(type) {
-            switch (type) {
-                case 'success':
-                    return '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />';
-                case 'warning':
-                    return '<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />';
-                case 'danger':
-                    return '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />';
-                case 'info':
-                    return '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />';
-                default:
-                    return '';
-            }
-        }
-
-        function formatNumber(num) {
-            return new Intl.NumberFormat('en-US').format(num);
-        }
-
-        function formatDate(date) {
-            return new Intl.DateTimeFormat('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).format(new Date(date));
-        }
-
-        function exportReport(format) {
-            alert(`Exporting report as ${format.toUpperCase()}...`);
-            // In production, this would generate and download the actual report
-        }
-
-        // Simulate real-time updates
-        setInterval(() => {
-            // Simulate processing of pending requests
-            const pendingRequest = requests.find(r => r.status === 'pending');
-            if (pendingRequest && Math.random() > 0.7) {
-                pendingRequest.status = 'processing';
-                setTimeout(() => {
-                    pendingRequest.status = 'completed';
-                    pendingRequest.completedAt = new Date();
-                    loadRequests();
-                }, 5000);
-            }
-        }, 10000);
+        // Initialize
+        router.handleRoute();
+        window.logout = logout;
     </script>
 </body>
 </html>
