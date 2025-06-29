@@ -1,20 +1,23 @@
 {
-  "routes": [
-    {
-      "src": "/(.*).html",
-      "dest": "/$1.html"
-    }
-  ],
+  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*).html",
       "headers": [
         {
           "key": "Content-Type",
-          "value": "text/html"
+          "value": "text/html; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/admin.html",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
         }
       ]
     }
   ]
 }
-
