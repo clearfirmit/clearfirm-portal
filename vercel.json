@@ -1,17 +1,10 @@
 {
-  "cleanUrls": true,
+  "buildCommand": false,
+  "outputDirectory": ".",
+  "framework": null,
   "headers": [
     {
-      "source": "/(.*).html",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/html; charset=utf-8"
-        }
-      ]
-    },
-    {
-      "source": "/admin.html",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Type",
