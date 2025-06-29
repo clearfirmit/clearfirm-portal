@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Updated: June 29, 2025 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -151,25 +150,179 @@
         };
 
         const renderAdminDashboard = () => {
+            const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+            
             app.innerHTML = `
                 <div class="min-h-screen bg-gray-100">
                     <header class="bg-white border-b">
                         <div class="max-w-7xl mx-auto px-4 py-4">
                             <div class="flex justify-between">
-                                <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-                                <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
+                                <h1 class="text-2xl font-bold">ClearFirm Admin Dashboard</h1>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-600">${adminUser.email || 'Admin'}</span>
+                                    <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
+                                </div>
                             </div>
                         </div>
                     </header>
                     <main class="max-w-7xl mx-auto px-4 py-8">
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h2 class="text-lg font-semibold mb-4">Welcome to Admin Dashboard</h2>
-                            <p>Full admin functionality coming soon...</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h3 class="text-sm font-medium text-gray-500">Pending Requests</h3>
+                                <p class="text-3xl font-bold text-gray-900" id="pendingCount">-</p>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h3 class="text-sm font-medium text-gray-500">Processing</h3>
+                                <p class="text-3xl font-bold text-blue-600" id="processingCount">-</p>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h3 class="text-sm font-medium text-gray-500">Completed Today</h3>
+                                <p class="text-3xl font-bold text-green-600" id="completedCount">-</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="px-6 py-4 border-b">
+                                <h2 class="text-lg font-semibold">Pending Verification Requests</h2>
+                            </div>
+                            <div class="p-6">
+                                <div id="requestsList" class="space-y-4">
+                                    <p class="text-gray-500">Loading requests...</p>
+                                </div>
+                            </div>
                         </div>
                     </main>
                 </div>
+
+                <!-- Upload Modal -->
+                <div id="uploadModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 w-96">
+                        <h3 class="text-lg font-semibold mb-4">Upload Transcript</h3>
+                        <form id="uploadForm">
+                            <input type="hidden" id="requestId">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Files</label>
+                                <input type="file" id="transcriptFile" multiple accept=".pdf,.txt,.html" required 
+                                       class="w-full border rounded px-3 py-2" />
+                                <p class="text-xs text-gray-500 mt-1">You can select multiple files</p>
+                            </div>
+                            <div class="flex justify-end space-x-2">
+                                <button type="button" onclick="closeUploadModal()" 
+                                        class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    Upload
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             `;
+
+            // Load pending requests
+            loadPendingRequests();
+            
+            // Set up upload form handler
+            const uploadForm = document.getElementById('uploadForm');
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const files = document.getElementById('transcriptFile').files;
+                    const requestId = document.getElementById('requestId').value;
+                    
+                    for (let file of files) {
+                        const formData = new FormData();
+                        formData.append('requestId', requestId);
+                        formData.append('file', file);
+                        
+                        try {
+                            await fetch(`${API_URL}/admin/upload-transcript`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                                },
+                                body: formData
+                            });
+                        } catch (error) {
+                            console.error('Upload error:', error);
+                        }
+                    }
+                    
+                    alert('Files uploaded successfully!');
+                    closeUploadModal();
+                    loadPendingRequests();
+                });
+            }
         };
+
+        async function loadPendingRequests() {
+            try {
+                const response = await fetch(`${API_URL}/admin/pending-requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayRequests(data.requests || []);
+                    
+                    // Update counts
+                    const pending = data.requests.filter(r => r.status === 'pending').length;
+                    const processing = data.requests.filter(r => r.status === 'processing').length;
+                    const completed = data.requests.filter(r => r.status === 'completed' && 
+                        new Date(r.updated_at).toDateString() === new Date().toDateString()).length;
+                    
+                    document.getElementById('pendingCount').textContent = pending;
+                    document.getElementById('processingCount').textContent = processing;
+                    document.getElementById('completedCount').textContent = completed;
+                } else {
+                    document.getElementById('requestsList').innerHTML = 
+                        '<p class="text-red-600">Failed to load requests</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('requestsList').innerHTML = 
+                    '<p class="text-red-600">Error loading requests</p>';
+            }
+        }
+
+        function displayRequests(requests) {
+            const container = document.getElementById('requestsList');
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No pending requests</p>';
+                return;
+            }
+
+            container.innerHTML = requests.map(req => `
+                <div class="border rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-semibold">${req.business_name}</h4>
+                            <p class="text-sm text-gray-600">EIN: ${req.ein}</p>
+                            <p class="text-sm text-gray-500">Requested: ${new Date(req.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <div class="space-y-2">
+                            <button onclick="openUploadModal(${req.id}, '${req.business_name}')" 
+                                    class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                                Upload Transcript
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openUploadModal(requestId, businessName) {
+            document.getElementById('requestId').value = requestId;
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+            document.getElementById('uploadForm').reset();
+        }
 
         const renderLogin = () => {
             app.innerHTML = `
@@ -236,7 +389,12 @@
 
         // Initialize
         router.handleRoute();
+        
+        // Make functions globally available
         window.logout = logout;
+        window.loadPendingRequests = loadPendingRequests;
+        window.openUploadModal = openUploadModal;
+        window.closeUploadModal = closeUploadModal;
     </script>
 </body>
 </html>
