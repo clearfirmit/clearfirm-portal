@@ -1,16 +1,5 @@
 {
-  "buildCommand": false,
+  "buildCommand": null,
   "outputDirectory": ".",
-  "framework": null,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/html; charset=utf-8"
-        }
-      ]
-    }
-  ]
+  "framework": null
 }
