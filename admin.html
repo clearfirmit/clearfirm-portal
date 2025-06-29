@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClearFirm Admin - Manage Verifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Login Section -->
+        <div id="loginSection" class="flex items-center justify-center min-h-screen">
+            <div class="bg-white p-8 rounded-lg shadow-md w-96">
+                <h2 class="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+                <form id="adminLoginForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="adminEmail" required 
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="adminPassword" required 
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" 
+                            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard (hidden initially) -->
+        <div id="adminDashboard" class="hidden">
+            <!-- Header -->
+            <header class="bg-white border-b">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-2xl font-bold">ClearFirm Admin Dashboard</h1>
+                        <div class="flex items-center space-x-4">
+                            <span id="adminName" class="text-sm text-gray-600"></span>
+                            <button id="logoutBtn" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-sm font-medium text-gray-500">Pending Requests</h3>
+                        <p class="text-3xl font-bold text-gray-900" id="pendingCount">0</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-sm font-medium text-gray-500">Processing</h3>
+                        <p class="text-3xl font-bold text-blue-600" id="processingCount">0</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-sm font-medium text-gray-500">Completed Today</h3>
+                        <p class="text-3xl font-bold text-green-600" id="completedCount">0</p>
+                    </div>
+                </div>
+
+                <!-- Pending Requests -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold">Verification Requests</h2>
+                    </div>
+                    <div class="p-6">
+                        <div id="pendingRequests" class="space-y-4">
+                            <p class="text-gray-500">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Upload Modal -->
+            <div id="uploadModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                    <h3 class="text-lg font-semibold mb-4">Upload Transcript</h3>
+                    <form id="uploadForm">
+                        <input type="hidden" id="requestId" />
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Business Name</label>
+                            <p id="uploadBusinessName" class="text-gray-700 font-semibold"></p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Select Transcript File</label>
+                            <input type="file" id="transcriptFile" accept=".pdf,.txt,.html" required 
+                                   class="w-full border rounded px-3 py-2" />
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="closeUploadModal()" 
+                                    class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Upload
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Parse with Claude Modal -->
+            <div id="parseModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <h3 class="text-lg font-semibold mb-4">Parse Transcript with Claude</h3>
+                    <div id="parseContent" class="mb-4">
+                        <!-- Parse results will show here -->
+                    </div>
+                    <div class="mt-4 flex justify-end space-x-3">
+                        <button onclick="closeParseModal()" 
+                                class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                            Close
+                        </button>
+                        <button onclick="sendAssessment()" id="sendAssessmentBtn"
+                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 hidden">
+                            Send Assessment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001/api' 
+            : 'https://clearfirm-api.onrender.com/api';
+
+        let currentRequest = null;
+        let currentProfile = null;
+
+        // Check if already logged in
+        if (localStorage.getItem('token')) {
+            checkAdminAuth();
+        }
+
+        // Admin login
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Invalid credentials');
+                }
+
+                const { token, user } = await response.json();
+                
+                if (!user.is_admin) {
+                    throw new Error('Admin access required');
+                }
+
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                showAdminDashboard(user);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        async function checkAdminAuth() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (user && user.is_admin) {
+                    showAdminDashboard(user);
+                    return;
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+            }
+            
+            // If not admin, clear storage and show login
+            localStorage.clear();
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        function showAdminDashboard(user) {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            document.getElementById('adminName').textContent = user.email;
+            loadPendingRequests();
+        }
+
+        // Load pending requests
+        async function loadPendingRequests() {
+            try {
+                const response = await fetch(`${API_URL}/admin/pending-requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        alert('Admin access required');
+                        localStorage.clear();
+                        window.location.reload();
+                        return;
+                    }
+                    throw new Error('Failed to load requests');
+                }
+
+                const { requests } = await response.json();
+                displayRequests(requests);
+                updateStats(requests);
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                document.getElementById('pendingRequests').innerHTML = 
+                    '<p class="text-red-500">Error loading requests. Please refresh.</p>';
+            }
+        }
+
+        function updateStats(requests) {
+            const pending = requests.filter(r => r.status === 'pending').length;
+            const processing = requests.filter(r => r.status === 'processing').length;
+            const today = new Date().toDateString();
+            const completed = requests.filter(r => 
+                r.status === 'completed' && 
+                new Date(r.updated_at).toDateString() === today
+            ).length;
+
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('processingCount').textContent = processing;
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        function displayRequests(requests) {
+            const container = document.getElementById('pendingRequests');
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No pending requests</p>';
+                return;
+            }
+
+            container.innerHTML = requests.map(req => `
+                <div class="border rounded-lg p-4 ${req.status === 'completed' ? 'bg-gray-50' : ''}">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-semibold">${req.business_name}</h4>
+                            <p class="text-sm text-gray-600">EIN: ${req.ein}</p>
+                            <p class="text-sm text-gray-600">Requested by: ${req.users?.email || 'Unknown'}</p>
+                            <p class="text-sm text-gray-500">
+                                ${new Date(req.created_at).toLocaleString()}
+                            </p>
+                            <div class="mt-2 space-y-1">
+                                <span class="inline-block px-2 py-1 text-xs rounded-full 
+                                    ${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                      req.status === 'processing' ? 'bg-blue-100 text-blue-800' : 
+                                      req.status === 'analyzed' ? 'bg-purple-100 text-purple-800' :
+                                      'bg-green-100 text-green-800'}">
+                                    ${req.status.toUpperCase()}
+                                </span>
+                                ${req.business_owner_notified ? `
+                                    <span class="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                        ✓ Sent to ${req.business_owner_email}
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            ${req.status === 'pending' ? 
+                                `<button onclick="openUploadModal(${req.id}, '${req.business_name}')" 
+                                    class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 block w-full">
+                                    Upload Transcript
+                                </button>` :
+                                req.status === 'processing' ?
+                                `<button onclick="parseTranscript(${req.id})" 
+                                    class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 block w-full">
+                                    Parse with Claude
+                                </button>` :
+                                req.status === 'analyzed' && !req.business_owner_notified ?
+                                `<button onclick="viewAndSendAssessment(${req.id})" 
+                                    class="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 block w-full">
+                                    Send to Business Owner
+                                </button>` :
+                                `<button onclick="viewAssessment(${req.id})" 
+                                    class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 block w-full">
+                                    View Assessment
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View and send assessment for already analyzed requests
+        async function viewAndSendAssessment(requestId) {
+            currentRequest = requestId;
+            // Fetch the existing profile and show send modal
+            try {
+                const response = await fetch(`${API_URL}/business/report/${requestId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch report');
+
+                const report = await response.json();
+                currentProfile = report.business_profile;
+                
+                // Show the send assessment modal directly
+                sendAssessment();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load assessment');
+            }
+        }
+
+        function openUploadModal(requestId, businessName) {
+            currentRequest = requestId;
+            document.getElementById('requestId').value = requestId;
+            document.getElementById('uploadBusinessName').textContent = businessName;
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+            document.getElementById('uploadForm').reset();
+        }
+
+        // Handle file upload
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('requestId', document.getElementById('requestId').value);
+            formData.append('file', document.getElementById('transcriptFile').files[0]);
+
+            try {
+                const response = await fetch(`${API_URL}/admin/upload-transcript`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                alert('Transcript uploaded successfully!');
+                closeUploadModal();
+                loadPendingRequests();
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Failed to upload transcript. Please try again.');
+            }
+        });
+
+        // Parse transcript with Claude
+        async function parseTranscript(requestId) {
+            currentRequest = requestId;
+            document.getElementById('parseModal').classList.remove('hidden');
+            document.getElementById('parseContent').innerHTML = 
+                '<p class="text-gray-500">Parsing transcript with Claude AI...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/admin/parse-transcript/${requestId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to parse transcript');
+
+                const { profile } = await response.json();
+                currentProfile = profile;
+                displayParsedProfile(profile);
+                document.getElementById('sendAssessmentBtn').classList.remove('hidden');
+            } catch (error) {
+                console.error('Parse error:', error);
+                document.getElementById('parseContent').innerHTML = 
+                    '<p class="text-red-500">Failed to parse transcript. Please try again.</p>';
+            }
+        }
+
+        function displayParsedProfile(profile) {
+            const hasIssues = profile.complianceIssues && profile.complianceIssues.length > 0;
+            const hasMissingReturns = profile.missingReturns && profile.missingReturns.length > 0;
+            
+            document.getElementById('parseContent').innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold">Entity Type</h4>
+                            <p class="text-sm text-gray-600">${profile.entityType || 'Unknown'}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Industry</h4>
+                            <p class="text-sm text-gray-600">${profile.industry || 'Unknown'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-gray-50 p-3 rounded">
+                            <h4 class="font-semibold text-sm">Tax Debt</h4>
+                            <p class="text-lg font-bold ${profile.taxDebtStatus?.hasDebt ? 'text-red-600' : 'text-green-600'}">
+                                ${(profile.taxDebtStatus?.amount || 0).toLocaleString()}
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <h4 class="font-semibold text-sm">Missing Returns</h4>
+                            <p class="text-lg font-bold ${hasMissingReturns ? 'text-red-600' : 'text-green-600'}">
+                                ${profile.missingReturns?.length || 0}
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <h4 class="font-semibold text-sm">Risk Score</h4>
+                            <p class="text-lg font-bold">${profile.riskScore || 0}/100</p>
+                            <p class="text-xs text-gray-600">${profile.riskLevel || 'Unknown'}</p>
+                        </div>
+                    </div>
+                    
+                    ${profile.financialSummary ? `
+                    <div>
+                        <h4 class="font-semibold">Financial Summary (${profile.financialSummary.latestYear})</h4>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div class="flex justify-between">
+                                <span>Gross Receipts:</span>
+                                <span class="font-medium">${profile.financialSummary.grossReceipts.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Deductions:</span>
+                                <span class="font-medium">${profile.financialSummary.totalDeductions.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Ordinary Income:</span>
+                                <span class="font-medium ${profile.financialSummary.ordinaryIncome < 0 ? 'text-red-600' : ''}">
+                                    ${profile.financialSummary.ordinaryIncome.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${hasIssues ? `
+                    <div>
+                        <h4 class="font-semibold text-red-600">Compliance Issues</h4>
+                        <ul class="text-sm text-gray-600 list-disc list-inside">
+                            ${profile.complianceIssues.map(issue => `<li>${issue.title}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    ${profile.recommendedServices && profile.recommendedServices.length > 0 ? `
+                    <div>
+                        <h4 class="font-semibold">Recommended Services</h4>
+                        <ul class="text-sm text-gray-600 list-disc list-inside">
+                            ${profile.recommendedServices.map(service => `<li>${service.name}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="bg-blue-50 p-3 rounded">
+                        <p class="text-sm text-blue-800">
+                            <strong>Note:</strong> This assessment will be sent to the client in the ClearFirm branded format 
+                            with a call-to-action for scheduling a consultation.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeParseModal() {
+            document.getElementById('parseModal').classList.add('hidden');
+            document.getElementById('sendAssessmentBtn').classList.add('hidden');
+            currentRequest = null;
+            currentProfile = null;
+        }
+
+        async function sendAssessment() {
+            if (!currentRequest || !currentProfile) return;
+
+            // Show email input modal
+            const emailModal = document.createElement('div');
+            emailModal.className = 'fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50';
+            emailModal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                    <h3 class="text-lg font-semibold mb-4">Send Assessment to Business Owner</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Enter the business owner's email address. They will receive a free tax assessment 
+                        with recommendations and an option to schedule a consultation.
+                    </p>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Business Owner Email</label>
+                        <input type="email" id="businessOwnerEmail" required 
+                               placeholder="owner@business.com"
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="text-xs text-gray-500 mb-4">
+                        Note: The business owner will NOT be informed about who requested this assessment.
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                            Cancel
+                        </button>
+                        <button onclick="confirmSendAssessment(this)" 
+                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Send Assessment
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(emailModal);
+            document.getElementById('businessOwnerEmail').focus();
+        }
+
+        async function confirmSendAssessment(button) {
+            const email = document.getElementById('businessOwnerEmail').value;
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Sending...';
+
+            try {
+                const response = await fetch(`${API_URL}/admin/send-assessment`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        requestId: currentRequest,
+                        businessOwnerEmail: email
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to send assessment');
+
+                alert(`Assessment sent successfully to ${email}!`);
+                button.closest('.fixed').remove();
+                closeParseModal();
+                loadPendingRequests();
+            } catch (error) {
+                console.error('Send error:', error);
+                alert('Failed to send assessment. Please try again.');
+                button.disabled = false;
+                button.textContent = 'Send Assessment';
+            }
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.reload();
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (!document.getElementById('adminDashboard').classList.contains('hidden')) {
+                loadPendingRequests();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
+
