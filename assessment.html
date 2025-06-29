@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Tax Assessment - ClearFirm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="loading" class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+            <p class="mt-4 text-gray-600">Loading your assessment...</p>
+        </div>
+    </div>
+
+    <div id="error" class="hidden min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-md max-w-md text-center">
+            <h2 class="text-2xl font-bold text-red-600 mb-4">Assessment Not Found</h2>
+            <p class="text-gray-600 mb-6">This assessment link may be invalid or expired.</p>
+            <a href="https://getclearfirm.com" class="text-blue-600 hover:text-blue-800">
+                Visit ClearFirm Website
+            </a>
+        </div>
+    </div>
+
+    <div id="content" class="hidden">
+        <!-- Assessment will be loaded here -->
+    </div>
+
+    <script>
+        // Get token from URL
+        const pathParts = window.location.pathname.split('/');
+        const token = pathParts[pathParts.length - 1];
+
+        if (!token || token === 'assessment') {
+            showError();
+        } else {
+            loadAssessment(token);
+        }
+
+        async function loadAssessment(token) {
+            try {
+                const response = await fetch(`/api/public/assessment/${token}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load assessment');
+                }
+
+                const data = await response.json();
+                
+                // Hide loading, show content
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('content').classList.remove('hidden');
+                
+                // Display the assessment HTML
+                document.getElementById('content').innerHTML = data.assessmentHtml;
+                
+                // Update page title
+                document.title = `Tax Assessment - ${data.businessName} - ClearFirm`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError();
+            }
+        }
+
+        function showError() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
