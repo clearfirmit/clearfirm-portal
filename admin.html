@@ -1,578 +1,630 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClearFirm Admin - Manage Verifications</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    span.s1 {font-kerning: none}
+  </style>
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen">
-        <!-- Login Section -->
-        <div id="loginSection" class="flex items-center justify-center min-h-screen">
-            <div class="bg-white p-8 rounded-lg shadow-md w-96">
-                <h2 class="text-2xl font-bold mb-6 text-center">Admin Login</h2>
-                <form id="adminLoginForm">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" id="adminEmail" required 
-                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input type="password" id="adminPassword" required 
-                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <button type="submit" 
-                            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">
-                        Login
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Admin Dashboard (hidden initially) -->
-        <div id="adminDashboard" class="hidden">
-            <!-- Header -->
-            <header class="bg-white border-b">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div class="flex items-center justify-between">
-                        <h1 class="text-2xl font-bold">ClearFirm Admin Dashboard</h1>
-                        <div class="flex items-center space-x-4">
-                            <span id="adminName" class="text-sm text-gray-600"></span>
-                            <button id="logoutBtn" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Main Content -->
-            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <!-- Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-sm font-medium text-gray-500">Pending Requests</h3>
-                        <p class="text-3xl font-bold text-gray-900" id="pendingCount">0</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-sm font-medium text-gray-500">Processing</h3>
-                        <p class="text-3xl font-bold text-blue-600" id="processingCount">0</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-sm font-medium text-gray-500">Completed Today</h3>
-                        <p class="text-3xl font-bold text-green-600" id="completedCount">0</p>
-                    </div>
-                </div>
-
-                <!-- Pending Requests -->
-                <div class="bg-white rounded-lg shadow mb-8">
-                    <div class="px-6 py-4 border-b">
-                        <h2 class="text-lg font-semibold">Verification Requests</h2>
-                    </div>
-                    <div class="p-6">
-                        <div id="pendingRequests" class="space-y-4">
-                            <p class="text-gray-500">Loading...</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- Upload Modal -->
-            <div id="uploadModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                    <h3 class="text-lg font-semibold mb-4">Upload Transcript</h3>
-                    <form id="uploadForm">
-                        <input type="hidden" id="requestId" />
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Business Name</label>
-                            <p id="uploadBusinessName" class="text-gray-700 font-semibold"></p>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Select Transcript File</label>
-                            <input type="file" id="transcriptFile" accept=".pdf,.txt,.html" required 
-                                   class="w-full border rounded px-3 py-2" />
-                        </div>
-                        <div class="flex justify-end space-x-3">
-                            <button type="button" onclick="closeUploadModal()" 
-                                    class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                                Cancel
-                            </button>
-                            <button type="submit" 
-                                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                Upload
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Parse with Claude Modal -->
-            <div id="parseModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                    <h3 class="text-lg font-semibold mb-4">Parse Transcript with Claude</h3>
-                    <div id="parseContent" class="mb-4">
-                        <!-- Parse results will show here -->
-                    </div>
-                    <div class="mt-4 flex justify-end space-x-3">
-                        <button onclick="closeParseModal()" 
-                                class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                            Close
-                        </button>
-                        <button onclick="sendAssessment()" id="sendAssessmentBtn"
-                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 hidden">
-                            Send Assessment
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001/api' 
-            : 'https://clearfirm-api.onrender.com/api';
-
-        let currentRequest = null;
-        let currentProfile = null;
-
-        // Check if already logged in
-        if (localStorage.getItem('token')) {
-            checkAdminAuth();
-        }
-
-        // Admin login
-        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-
-            try {
-                const response = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Invalid credentials');
-                }
-
-                const { token, user } = await response.json();
-                
-                if (!user.is_admin) {
-                    throw new Error('Admin access required');
-                }
-
-                localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(user));
-                
-                showAdminDashboard(user);
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        async function checkAdminAuth() {
-            try {
-                const user = JSON.parse(localStorage.getItem('user'));
-                if (user && user.is_admin) {
-                    showAdminDashboard(user);
-                    return;
-                }
-            } catch (error) {
-                console.error('Auth check error:', error);
-            }
-            
-            // If not admin, clear storage and show login
-            localStorage.clear();
-            document.getElementById('loginSection').classList.remove('hidden');
-        }
-
-        function showAdminDashboard(user) {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.remove('hidden');
-            document.getElementById('adminName').textContent = user.email;
-            loadPendingRequests();
-        }
-
-        // Load pending requests
-        async function loadPendingRequests() {
-            try {
-                const response = await fetch(`${API_URL}/admin/pending-requests`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) {
-                    if (response.status === 403) {
-                        alert('Admin access required');
-                        localStorage.clear();
-                        window.location.reload();
-                        return;
-                    }
-                    throw new Error('Failed to load requests');
-                }
-
-                const { requests } = await response.json();
-                displayRequests(requests);
-                updateStats(requests);
-            } catch (error) {
-                console.error('Error loading requests:', error);
-                document.getElementById('pendingRequests').innerHTML = 
-                    '<p class="text-red-500">Error loading requests. Please refresh.</p>';
-            }
-        }
-
-        function updateStats(requests) {
-            const pending = requests.filter(r => r.status === 'pending').length;
-            const processing = requests.filter(r => r.status === 'processing').length;
-            const today = new Date().toDateString();
-            const completed = requests.filter(r => 
-                r.status === 'completed' && 
-                new Date(r.updated_at).toDateString() === today
-            ).length;
-
-            document.getElementById('pendingCount').textContent = pending;
-            document.getElementById('processingCount').textContent = processing;
-            document.getElementById('completedCount').textContent = completed;
-        }
-
-        function displayRequests(requests) {
-            const container = document.getElementById('pendingRequests');
-            
-            if (requests.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No pending requests</p>';
-                return;
-            }
-
-            container.innerHTML = requests.map(req => `
-                <div class="border rounded-lg p-4 ${req.status === 'completed' ? 'bg-gray-50' : ''}">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-semibold">${req.business_name}</h4>
-                            <p class="text-sm text-gray-600">EIN: ${req.ein}</p>
-                            <p class="text-sm text-gray-600">Requested by: ${req.users?.email || 'Unknown'}</p>
-                            <p class="text-sm text-gray-500">
-                                ${new Date(req.created_at).toLocaleString()}
-                            </p>
-                            <div class="mt-2 space-y-1">
-                                <span class="inline-block px-2 py-1 text-xs rounded-full 
-                                    ${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                      req.status === 'processing' ? 'bg-blue-100 text-blue-800' : 
-                                      req.status === 'analyzed' ? 'bg-purple-100 text-purple-800' :
-                                      'bg-green-100 text-green-800'}">
-                                    ${req.status.toUpperCase()}
-                                </span>
-                                ${req.business_owner_notified ? `
-                                    <span class="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                                        ✓ Sent to ${req.business_owner_email}
-                                    </span>
-                                ` : ''}
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            ${req.status === 'pending' ? 
-                                `<button onclick="openUploadModal(${req.id}, '${req.business_name}')" 
-                                    class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 block w-full">
-                                    Upload Transcript
-                                </button>` :
-                                req.status === 'processing' ?
-                                `<button onclick="parseTranscript(${req.id})" 
-                                    class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 block w-full">
-                                    Parse with Claude
-                                </button>` :
-                                req.status === 'analyzed' && !req.business_owner_notified ?
-                                `<button onclick="viewAndSendAssessment(${req.id})" 
-                                    class="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 block w-full">
-                                    Send to Business Owner
-                                </button>` :
-                                `<button onclick="viewAssessment(${req.id})" 
-                                    class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 block w-full">
-                                    View Assessment
-                                </button>`
-                            }
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // View and send assessment for already analyzed requests
-        async function viewAndSendAssessment(requestId) {
-            currentRequest = requestId;
-            // Fetch the existing profile and show send modal
-            try {
-                const response = await fetch(`${API_URL}/business/report/${requestId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch report');
-
-                const report = await response.json();
-                currentProfile = report.business_profile;
-                
-                // Show the send assessment modal directly
-                sendAssessment();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to load assessment');
-            }
-        }
-
-        function openUploadModal(requestId, businessName) {
-            currentRequest = requestId;
-            document.getElementById('requestId').value = requestId;
-            document.getElementById('uploadBusinessName').textContent = businessName;
-            document.getElementById('uploadModal').classList.remove('hidden');
-        }
-
-        function closeUploadModal() {
-            document.getElementById('uploadModal').classList.add('hidden');
-            document.getElementById('uploadForm').reset();
-        }
-
-        // Handle file upload
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData();
-            formData.append('requestId', document.getElementById('requestId').value);
-            formData.append('file', document.getElementById('transcriptFile').files[0]);
-
-            try {
-                const response = await fetch(`${API_URL}/admin/upload-transcript`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error('Upload failed');
-
-                alert('Transcript uploaded successfully!');
-                closeUploadModal();
-                loadPendingRequests();
-            } catch (error) {
-                console.error('Upload error:', error);
-                alert('Failed to upload transcript. Please try again.');
-            }
-        });
-
-        // Parse transcript with Claude
-        async function parseTranscript(requestId) {
-            currentRequest = requestId;
-            document.getElementById('parseModal').classList.remove('hidden');
-            document.getElementById('parseContent').innerHTML = 
-                '<p class="text-gray-500">Parsing transcript with Claude AI...</p>';
-
-            try {
-                const response = await fetch(`${API_URL}/admin/parse-transcript/${requestId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to parse transcript');
-
-                const { profile } = await response.json();
-                currentProfile = profile;
-                displayParsedProfile(profile);
-                document.getElementById('sendAssessmentBtn').classList.remove('hidden');
-            } catch (error) {
-                console.error('Parse error:', error);
-                document.getElementById('parseContent').innerHTML = 
-                    '<p class="text-red-500">Failed to parse transcript. Please try again.</p>';
-            }
-        }
-
-        function displayParsedProfile(profile) {
-            const hasIssues = profile.complianceIssues && profile.complianceIssues.length > 0;
-            const hasMissingReturns = profile.missingReturns && profile.missingReturns.length > 0;
-            
-            document.getElementById('parseContent').innerHTML = `
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 class="font-semibold">Entity Type</h4>
-                            <p class="text-sm text-gray-600">${profile.entityType || 'Unknown'}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold">Industry</h4>
-                            <p class="text-sm text-gray-600">${profile.industry || 'Unknown'}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-gray-50 p-3 rounded">
-                            <h4 class="font-semibold text-sm">Tax Debt</h4>
-                            <p class="text-lg font-bold ${profile.taxDebtStatus?.hasDebt ? 'text-red-600' : 'text-green-600'}">
-                                ${(profile.taxDebtStatus?.amount || 0).toLocaleString()}
-                            </p>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded">
-                            <h4 class="font-semibold text-sm">Missing Returns</h4>
-                            <p class="text-lg font-bold ${hasMissingReturns ? 'text-red-600' : 'text-green-600'}">
-                                ${profile.missingReturns?.length || 0}
-                            </p>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded">
-                            <h4 class="font-semibold text-sm">Risk Score</h4>
-                            <p class="text-lg font-bold">${profile.riskScore || 0}/100</p>
-                            <p class="text-xs text-gray-600">${profile.riskLevel || 'Unknown'}</p>
-                        </div>
-                    </div>
-                    
-                    ${profile.financialSummary ? `
-                    <div>
-                        <h4 class="font-semibold">Financial Summary (${profile.financialSummary.latestYear})</h4>
-                        <div class="text-sm text-gray-600 space-y-1">
-                            <div class="flex justify-between">
-                                <span>Gross Receipts:</span>
-                                <span class="font-medium">${profile.financialSummary.grossReceipts.toLocaleString()}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Total Deductions:</span>
-                                <span class="font-medium">${profile.financialSummary.totalDeductions.toLocaleString()}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Ordinary Income:</span>
-                                <span class="font-medium ${profile.financialSummary.ordinaryIncome < 0 ? 'text-red-600' : ''}">
-                                    ${profile.financialSummary.ordinaryIncome.toLocaleString()}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    ` : ''}
-                    
-                    ${hasIssues ? `
-                    <div>
-                        <h4 class="font-semibold text-red-600">Compliance Issues</h4>
-                        <ul class="text-sm text-gray-600 list-disc list-inside">
-                            ${profile.complianceIssues.map(issue => `<li>${issue.title}</li>`).join('')}
-                        </ul>
-                    </div>
-                    ` : ''}
-                    
-                    ${profile.recommendedServices && profile.recommendedServices.length > 0 ? `
-                    <div>
-                        <h4 class="font-semibold">Recommended Services</h4>
-                        <ul class="text-sm text-gray-600 list-disc list-inside">
-                            ${profile.recommendedServices.map(service => `<li>${service.name}</li>`).join('')}
-                        </ul>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="bg-blue-50 p-3 rounded">
-                        <p class="text-sm text-blue-800">
-                            <strong>Note:</strong> This assessment will be sent to the client in the ClearFirm branded format 
-                            with a call-to-action for scheduling a consultation.
-                        </p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function closeParseModal() {
-            document.getElementById('parseModal').classList.add('hidden');
-            document.getElementById('sendAssessmentBtn').classList.add('hidden');
-            currentRequest = null;
-            currentProfile = null;
-        }
-
-        async function sendAssessment() {
-            if (!currentRequest || !currentProfile) return;
-
-            // Show email input modal
-            const emailModal = document.createElement('div');
-            emailModal.className = 'fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50';
-            emailModal.innerHTML = `
-                <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                    <h3 class="text-lg font-semibold mb-4">Send Assessment to Business Owner</h3>
-                    <p class="text-sm text-gray-600 mb-4">
-                        Enter the business owner's email address. They will receive a free tax assessment 
-                        with recommendations and an option to schedule a consultation.
-                    </p>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium mb-2">Business Owner Email</label>
-                        <input type="email" id="businessOwnerEmail" required 
-                               placeholder="owner@business.com"
-                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="text-xs text-gray-500 mb-4">
-                        Note: The business owner will NOT be informed about who requested this assessment.
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button onclick="this.closest('.fixed').remove()" 
-                                class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                            Cancel
-                        </button>
-                        <button onclick="confirmSendAssessment(this)" 
-                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                            Send Assessment
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(emailModal);
-            document.getElementById('businessOwnerEmail').focus();
-        }
-
-        async function confirmSendAssessment(button) {
-            const email = document.getElementById('businessOwnerEmail').value;
-            if (!email || !email.includes('@')) {
-                alert('Please enter a valid email address');
-                return;
-            }
-
-            button.disabled = true;
-            button.textContent = 'Sending...';
-
-            try {
-                const response = await fetch(`${API_URL}/admin/send-assessment`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        requestId: currentRequest,
-                        businessOwnerEmail: email
-                    })
-                });
-
-                if (!response.ok) throw new Error('Failed to send assessment');
-
-                alert(`Assessment sent successfully to ${email}!`);
-                button.closest('.fixed').remove();
-                closeParseModal();
-                loadPendingRequests();
-            } catch (error) {
-                console.error('Send error:', error);
-                alert('Failed to send assessment. Please try again.');
-                button.disabled = false;
-                button.textContent = 'Send Assessment';
-            }
-        }
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.clear();
-            window.location.reload();
-        });
-
-        // Auto-refresh every 30 seconds
-        setInterval(() => {
-            if (!document.getElementById('adminDashboard').classList.contains('hidden')) {
-                loadPendingRequests();
-            }
-        }, 30000);
-    </script>
+<body>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>&lt;!DOCTYPE html&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>&lt;html lang="en"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>&lt;head&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;title&gt;ClearFirm Admin - Manage Verifications&lt;/title&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>&lt;/head&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>&lt;body class="bg-gray-50"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;div class="min-h-screen"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>&lt;!-- Login Section --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>&lt;div id="loginSection" class="flex items-center justify-center min-h-screen"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;div class="bg-white p-8 rounded-lg shadow-md w-96"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;h2 class="text-2xl font-bold mb-6 text-center"&gt;Admin Login&lt;/h2&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;form id="adminLoginForm"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="mb-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;label class="block text-sm font-medium text-gray-700 mb-2"&gt;Email&lt;/label&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;input type="email" id="adminEmail" required<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                               </span>class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="mb-6"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;label class="block text-sm font-medium text-gray-700 mb-2"&gt;Password&lt;/label&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;input type="password" id="adminPassword" required<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                               </span>class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;button type="submit"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>Login</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/form&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>&lt;!-- Admin Dashboard (hidden initially) --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>&lt;div id="adminDashboard" class="hidden"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;!-- Header --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;header class="bg-white border-b"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="flex items-center justify-between"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h1 class="text-2xl font-bold"&gt;ClearFirm Admin Dashboard&lt;/h1&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="flex items-center space-x-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;span id="adminName" class="text-sm text-gray-600"&gt;&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;button id="logoutBtn" class="text-sm text-gray-600 hover:text-gray-900"&gt;Logout&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;/header&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;!-- Main Content --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;!-- Stats --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="bg-white rounded-lg shadow p-6"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h3 class="text-sm font-medium text-gray-500"&gt;Pending Requests&lt;/h3&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;p class="text-3xl font-bold text-gray-900" id="pendingCount"&gt;0&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="bg-white rounded-lg shadow p-6"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h3 class="text-sm font-medium text-gray-500"&gt;Processing&lt;/h3&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;p class="text-3xl font-bold text-blue-600" id="processingCount"&gt;0&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="bg-white rounded-lg shadow p-6"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h3 class="text-sm font-medium text-gray-500"&gt;Completed Today&lt;/h3&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;p class="text-3xl font-bold text-green-600" id="completedCount"&gt;0&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;!-- Pending Requests --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="bg-white rounded-lg shadow mb-8"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="px-6 py-4 border-b"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h2 class="text-lg font-semibold"&gt;Verification Requests&lt;/h2&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="p-6"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div id="pendingRequests" class="space-y-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-gray-500"&gt;Loading...&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;/main&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;!-- Upload Modal --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;div id="uploadModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="bg-white rounded-lg p-6 max-w-md w-full"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;h3 class="text-lg font-semibold mb-4"&gt;Upload Transcript(s)&lt;/h3&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;form id="uploadForm"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;input type="hidden" id="requestId" /&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="mb-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;label class="block text-sm font-medium mb-2"&gt;Business Name&lt;/label&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p id="uploadBusinessName" class="text-gray-700 font-semibold"&gt;&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="mb-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;label class="block text-sm font-medium mb-2"&gt;Select Transcript File(s)&lt;/label&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;input type="file" id="transcriptFile" accept=".pdf,.txt,.html" required<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                   </span>multiple</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                   </span>class="w-full border rounded px-3 py-2" /&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-xs text-gray-500 mt-1"&gt;You can select multiple files&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="flex justify-end space-x-3"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;button type="button" onclick="closeUploadModal()"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>class="px-4 py-2 text-gray-600 hover:text-gray-800"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>Cancel</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;button type="submit"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>Upload</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/form&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;!-- Parse with Claude Modal --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;div id="parseModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;h3 class="text-lg font-semibold mb-4"&gt;Parse Transcript with Claude&lt;/h3&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div id="parseContent" class="mb-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;!-- Parse results will show here --&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="mt-4 flex justify-end space-x-3"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;button onclick="closeParseModal()"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>class="px-4 py-2 text-gray-600 hover:text-gray-800"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>Close</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;button onclick="sendAssessment()" id="sendAssessmentBtn"</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 hidden"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>Send Assessment</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;script&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>const API_URL = window.location.hostname === 'localhost'<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>? 'http://localhost:3001/api'<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>: 'https://clearfirm-api.onrender.com/api';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>let currentRequest = null;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>let currentProfile = null;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// Check if already logged in</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>if (localStorage.getItem('token')) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>checkAdminAuth();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// Admin login</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>document.getElementById('adminLoginForm').addEventListener('submit', async (e) =&gt; {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>e.preventDefault();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const email = document.getElementById('adminEmail').value;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const password = document.getElementById('adminPassword').value;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>try {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const response = await fetch(`${API_URL}/auth/login`, {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>method: 'POST',</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>headers: { 'Content-Type': 'application/json' },</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>body: JSON.stringify({ email, password })</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>if (!response.ok) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>throw new Error('Invalid credentials');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const { token, user } = await response.json();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>if (!user.is_admin) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>throw new Error('Admin access required');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>localStorage.setItem('token', token);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>localStorage.setItem('user', JSON.stringify(user));</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>showAdminDashboard(user);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>} catch (error) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert(error.message);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>async function checkAdminAuth() {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>try {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const user = JSON.parse(localStorage.getItem('user'));</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>if (user &amp;&amp; user.is_admin) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>showAdminDashboard(user);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>return;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>} catch (error) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>console.error('Auth check error:', error);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>// If not admin, clear storage and show login</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>localStorage.clear();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('loginSection').classList.remove('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>function showAdminDashboard(user) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('loginSection').classList.add('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('adminDashboard').classList.remove('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('adminName').textContent = user.email;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>loadPendingRequests();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// Load pending requests</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>async function loadPendingRequests() {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>try {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const response = await fetch(`${API_URL}/admin/pending-requests`, {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>headers: {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>'Authorization': `Bearer ${localStorage.getItem('token')}`</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>if (!response.ok) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>if (response.status === 403) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>alert('Admin access required');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>localStorage.clear();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>window.location.reload();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>return;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>throw new Error('Failed to load requests');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const { requests } = await response.json();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>displayRequests(requests);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>updateStats(requests);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>} catch (error) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>console.error('Error loading requests:', error);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>document.getElementById('pendingRequests').innerHTML =<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>'&lt;p class="text-red-500"&gt;Error loading requests. Please refresh.&lt;/p&gt;';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>function updateStats(requests) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const pending = requests.filter(r =&gt; r.status === 'pending').length;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const processing = requests.filter(r =&gt; r.status === 'processing').length;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const today = new Date().toDateString();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const completed = requests.filter(r =&gt;<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>r.status === 'completed' &amp;&amp;<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>new Date(r.updated_at).toDateString() === today</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>).length;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('pendingCount').textContent = pending;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('processingCount').textContent = processing;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('completedCount').textContent = completed;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>function displayRequests(requests) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const container = document.getElementById('pendingRequests');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>if (requests.length === 0) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>container.innerHTML = '&lt;p class="text-gray-500"&gt;No pending requests&lt;/p&gt;';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>return;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>container.innerHTML = requests.map(req =&gt; `</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="border rounded-lg p-4 ${req.status === 'completed' ? 'bg-gray-50' : ''}"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="flex justify-between items-start"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;h4 class="font-semibold"&gt;${req.business_name}&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-sm text-gray-600"&gt;EIN: ${req.ein}&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-sm text-gray-600"&gt;Requested by: ${req.users?.email || 'Unknown'}&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-sm text-gray-500"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>${new Date(req.created_at).toLocaleString()}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;div class="mt-2 space-y-1"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;span class="inline-block px-2 py-1 text-xs rounded-full<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                      </span>req.status === 'processing' ? 'bg-blue-100 text-blue-800' :<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                      </span>req.status === 'analyzed' ? 'bg-purple-100 text-purple-800' :</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                      </span>'bg-green-100 text-green-800'}"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>${req.status.toUpperCase()}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>${req.business_owner_notified ? `</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>&lt;span class="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>✓ Sent to ${req.business_owner_email}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>` : ''}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="space-y-2"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>${req.status === 'pending' ?<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>`&lt;button onclick="openUploadModal(${req.id}, '${req.business_name}')"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 block w-full"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>Upload Transcript(s)</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;/button&gt;` :</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>req.transcripts &amp;&amp; req.transcripts.length &gt; 0 ?</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>`&lt;div class="space-y-2"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>&lt;p class="text-xs text-gray-600"&gt;${req.transcripts.length} transcript(s) uploaded&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>${req.status === 'processing' ?</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>`&lt;button onclick="parseTranscript(${req.id})"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                            </span>class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 block w-full"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                            </span>Parse All Transcripts</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>&lt;/button&gt;` :</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>req.status === 'analyzed' &amp;&amp; !req.business_owner_notified ?</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>`&lt;button onclick="viewAndSendAssessment(${req.id})"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                            </span>class="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 block w-full"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                            </span>Send to Business Owner</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>&lt;/button&gt;` :</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>`&lt;button onclick="viewAssessment(${req.id})"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                            </span>class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 block w-full"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                            </span>View Assessment</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                        </span>&lt;/button&gt;`</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;/div&gt;` :</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>`&lt;span class="text-sm text-gray-500"&gt;No transcripts&lt;/span&gt;`</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>`).join('');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>function openUploadModal(requestId, businessName) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>currentRequest = requestId;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('requestId').value = requestId;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('uploadBusinessName').textContent = businessName;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('uploadModal').classList.remove('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>function closeUploadModal() {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('uploadModal').classList.add('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('uploadForm').reset();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// Handle multiple file uploads</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>document.getElementById('uploadForm').addEventListener('submit', async (e) =&gt; {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>e.preventDefault();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const files = document.getElementById('transcriptFile').files;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const requestId = document.getElementById('requestId').value;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>if (files.length === 0) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert('Please select at least one file');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>return;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>// Show uploading status</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const submitBtn = e.target.querySelector('button[type="submit"]');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>submitBtn.disabled = true;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>submitBtn.textContent = `Uploading ${files.length} file(s)...`;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>let successCount = 0;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>let errorCount = 0;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>// Upload each file</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>for (let i = 0; i &lt; files.length; i++) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const formData = new FormData();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>formData.append('requestId', requestId);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>formData.append('file', files[i]);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>try {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>const response = await fetch(`${API_URL}/admin/upload-transcript`, {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>method: 'POST',</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>headers: {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>'Authorization': `Bearer ${localStorage.getItem('token')}`</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>},</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>body: formData</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>if (response.ok) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>successCount++;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>} else {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>errorCount++;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>console.error(`Failed to upload ${files[i].name}`);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>} catch (error) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>errorCount++;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>console.error('Upload error:', error);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>// Show results</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>if (errorCount === 0) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert(`Successfully uploaded ${successCount} transcript(s)!`);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>} else {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert(`Uploaded ${successCount} file(s). ${errorCount} failed.`);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>closeUploadModal();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>loadPendingRequests();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// Parse transcript with Claude</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>async function parseTranscript(requestId) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>currentRequest = requestId;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('parseModal').classList.remove('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('parseContent').innerHTML =<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>'&lt;p class="text-gray-500"&gt;Parsing transcript with Claude AI...&lt;/p&gt;';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>try {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const response = await fetch(`${API_URL}/admin/parse-transcript/${requestId}`, {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>headers: {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>'Authorization': `Bearer ${localStorage.getItem('token')}`</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>if (!response.ok) throw new Error('Failed to parse transcript');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const { profile } = await response.json();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>currentProfile = profile;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>displayParsedProfile(profile);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>document.getElementById('sendAssessmentBtn').classList.remove('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>} catch (error) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>console.error('Parse error:', error);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>document.getElementById('parseContent').innerHTML =<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>'&lt;p class="text-red-500"&gt;Failed to parse transcript. Please try again.&lt;/p&gt;';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>function displayParsedProfile(profile) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const hasIssues = profile.complianceIssues &amp;&amp; profile.complianceIssues.length &gt; 0;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const hasMissingReturns = profile.missingReturns &amp;&amp; profile.missingReturns.length &gt; 0;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">            </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('parseContent').innerHTML = `</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="space-y-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="grid grid-cols-2 gap-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;h4 class="font-semibold"&gt;Entity Type&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-sm text-gray-600"&gt;${profile.entityType || 'Unknown'}&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;h4 class="font-semibold"&gt;Industry&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-sm text-gray-600"&gt;${profile.industry || 'Unknown'}&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                    </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="grid grid-cols-3 gap-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="bg-gray-50 p-3 rounded"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;h4 class="font-semibold text-sm"&gt;Tax Debt&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-lg font-bold ${profile.taxDebtStatus?.hasDebt ? 'text-red-600' : 'text-green-600'}"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>$${(profile.taxDebtStatus?.amount || 0).toLocaleString()}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="bg-gray-50 p-3 rounded"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;h4 class="font-semibold text-sm"&gt;Missing Returns&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-lg font-bold ${hasMissingReturns ? 'text-red-600' : 'text-green-600'}"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>${profile.missingReturns?.length || 0}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="bg-gray-50 p-3 rounded"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;h4 class="font-semibold text-sm"&gt;Risk Score&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-lg font-bold"&gt;${profile.riskScore || 0}/100&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;p class="text-xs text-gray-600"&gt;${profile.riskLevel || 'Unknown'}&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                    </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>${profile.financialSummary ? `</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h4 class="font-semibold"&gt;Financial Summary (${profile.financialSummary.latestYear})&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;div class="text-sm text-gray-600 space-y-1"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;div class="flex justify-between"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;span&gt;Gross Receipts:&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;span class="font-medium"&gt;$${profile.financialSummary.grossReceipts.toLocaleString()}&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;div class="flex justify-between"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;span&gt;Total Deductions:&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;span class="font-medium"&gt;$${profile.financialSummary.totalDeductions.toLocaleString()}&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;div class="flex justify-between"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;span&gt;Ordinary Income:&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;span class="font-medium ${profile.financialSummary.ordinaryIncome &lt; 0 ? 'text-red-600' : ''}"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                    </span>$${profile.financialSummary.ordinaryIncome.toLocaleString()}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>&lt;/span&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>` : ''}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                    </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>${hasIssues ? `</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h4 class="font-semibold text-red-600"&gt;Compliance Issues&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;ul class="text-sm text-gray-600 list-disc list-inside"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>${profile.complianceIssues.map(issue =&gt; `&lt;li&gt;${issue.title}&lt;/li&gt;`).join('')}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/ul&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>` : ''}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                    </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>${profile.recommendedServices &amp;&amp; profile.recommendedServices.length &gt; 0 ? `</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;h4 class="font-semibold"&gt;Recommended Services&lt;/h4&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;ul class="text-sm text-gray-600 list-disc list-inside"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>${profile.recommendedServices.map(service =&gt; `&lt;li&gt;${service.name}&lt;/li&gt;`).join('')}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/ul&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>` : ''}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                    </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="bg-blue-50 p-3 rounded"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;p class="text-sm text-blue-800"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>&lt;strong&gt;Note:&lt;/strong&gt; This assessment will be sent to the client in the ClearFirm branded format<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>with a call-to-action for scheduling a consultation.</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>`;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>function closeParseModal() {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('parseModal').classList.add('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('sendAssessmentBtn').classList.add('hidden');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>currentRequest = null;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>currentProfile = null;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>async function sendAssessment() {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>if (!currentRequest || !currentProfile) return;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>// Show email input modal</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const emailModal = document.createElement('div');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>emailModal.className = 'fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>emailModal.innerHTML = `</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;div class="bg-white rounded-lg p-6 max-w-md w-full"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;h3 class="text-lg font-semibold mb-4"&gt;Send Assessment to Business Owner&lt;/h3&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;p class="text-sm text-gray-600 mb-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>Enter the business owner's email address. They will receive a free tax assessment<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>with recommendations and an option to schedule a consultation.</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/p&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="mb-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;label class="block text-sm font-medium mb-2"&gt;Business Owner Email&lt;/label&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;input type="email" id="businessOwnerEmail" required<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                               </span>placeholder="owner@business.com"</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                               </span>class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="text-xs text-gray-500 mb-4"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>Note: The business owner will NOT be informed about who requested this assessment.</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;div class="flex justify-end space-x-3"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;button onclick="this.closest('.fixed').remove()"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>class="px-4 py-2 text-gray-600 hover:text-gray-800"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>Cancel</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;button onclick="confirmSendAssessment(this)"<span class="Apple-converted-space"> </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                                </span>class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                            </span>Send Assessment</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>&lt;/button&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>&lt;/div&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>`;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.body.appendChild(emailModal);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>document.getElementById('businessOwnerEmail').focus();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>async function confirmSendAssessment(button) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>const email = document.getElementById('businessOwnerEmail').value;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>if (!email || !email.includes('@')) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert('Please enter a valid email address');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>return;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>button.disabled = true;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>button.textContent = 'Sending...';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>try {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const response = await fetch(`${API_URL}/admin/send-assessment`, {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>method: 'POST',</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>headers: {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>'Authorization': `Bearer ${localStorage.getItem('token')}`,</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>'Content-Type': 'application/json'</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>},</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>body: JSON.stringify({</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>requestId: currentRequest,</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>businessOwnerEmail: email</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>})</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>if (!response.ok) throw new Error('Failed to send assessment');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert(`Assessment sent successfully to ${email}!`);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>button.closest('.fixed').remove();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>closeParseModal();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>loadPendingRequests();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>} catch (error) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>console.error('Send error:', error);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert('Failed to send assessment. Please try again.');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>button.disabled = false;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>button.textContent = 'Send Assessment';</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// View and send assessment for already analyzed requests</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>async function viewAndSendAssessment(requestId) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>currentRequest = requestId;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>// Fetch the existing profile and show send modal</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>try {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const response = await fetch(`${API_URL}/business/report/${requestId}`, {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>headers: {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                        </span>'Authorization': `Bearer ${localStorage.getItem('token')}`</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                    </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>if (!response.ok) throw new Error('Failed to fetch report');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>const report = await response.json();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>currentProfile = report.business_profile;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b><span class="Apple-converted-space">                </span></b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>// Show the send assessment modal directly</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>sendAssessment();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>} catch (error) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>console.error('Error:', error);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>alert('Failed to load assessment');</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// Logout</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>document.getElementById('logoutBtn').addEventListener('click', () =&gt; {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>localStorage.clear();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>window.location.reload();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>});</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000; min-height: 23.0px"><span class="s1"><b></b></span><br></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>// Auto-refresh every 30 seconds</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>setInterval(() =&gt; {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>if (!document.getElementById('adminDashboard').classList.contains('hidden')) {</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">                </span>loadPendingRequests();</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">            </span>}</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">        </span>}, 30000);</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b><span class="Apple-converted-space">    </span>&lt;/script&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>&lt;/body&gt;</b></span></h2>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>&lt;/html&gt;</b></span></h2>
 </body>
 </html>
-
