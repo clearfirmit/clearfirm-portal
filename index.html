@@ -207,6 +207,38 @@
         let authToken = localStorage.getItem('authToken');
         let currentUser = null;
 
+            function showLogin() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function showRegister() {
+        document.getElementById('registerModal').classList.remove('hidden');
+    }
+    
+    function showDashboard() {
+        document.getElementById('landingPage').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+    }
+
+    function hideModal(modalId) {  
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+            
+    function showPricing() {
+        // In production, this would navigate to a pricing page or show a modal
+        alert('Pricing page would be shown here');
+    }
+                    
+    function logout() {
+        localStorage.removeItem('authToken');
+        authToken = null;
+        currentUser = null;  
+        location.reload();
+    }
+
         // Check authentication on load
         if (authToken) {
             checkAuth();
