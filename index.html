@@ -8,7 +8,6 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
     <style>
-        /* ClearFirm Brand Colors */
         :root {
             --clearfirm-black: #1f2937;
             --clearfirm-gray: #f5f5f5;
@@ -43,12 +42,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Admin Panel (Hidden by default) -->
-    <div id="adminPanel" style="display: none;"></div>
-    
-    <!-- Main App Container -->
-    <div id="mainApp">
-        <!-- Landing Page -->
     <!-- Landing Page -->
     <div id="landingPage" class="min-h-screen">
         <nav class="bg-white shadow-sm">
@@ -207,37 +200,46 @@
         let authToken = localStorage.getItem('authToken');
         let currentUser = null;
 
-            function showLogin() {
-        document.getElementById('loginModal').classList.remove('hidden');
-    }
-
-    function showRegister() {
-        document.getElementById('registerModal').classList.remove('hidden');
-    }
-    
-    function showDashboard() {
-        document.getElementById('landingPage').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-    }
-
-    function hideModal(modalId) {  
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('hidden');
+        // UI Functions
+        function showLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
         }
-    }
-            
-    function showPricing() {
-        // In production, this would navigate to a pricing page or show a modal
-        alert('Pricing page would be shown here');
-    }
-                    
-    function logout() {
-        localStorage.removeItem('authToken');
-        authToken = null;
-        currentUser = null;  
-        location.reload();
-    }
+
+        function showRegister() {
+            document.getElementById('registerModal').classList.remove('hidden');
+        }
+        
+        function hideLogin() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+        
+        function hideRegister() {
+            document.getElementById('registerModal').classList.add('hidden');
+        }
+        
+        function showDashboard() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+        
+        function showPricing() {
+            alert('Pricing page would be shown here');
+        }
+        
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            authToken = null;
+            currentUser = null;
+            location.reload();
+        }
 
         // Check authentication on load
         if (authToken) {
@@ -245,136 +247,87 @@
         }
 
         // Authentication functions
-	async function checkAuth() {
-    try {
-        const authToken = localStorage.getItem('authToken');
-        const user = localStorage.getItem('user');
-        
-        if (!authToken) {
-            return false;
-        }
-        
-        // Skip API check entirely - just use local storage
-        if (user) {
+        async function checkAuth() {
             try {
-                currentUser = JSON.parse(user);
-                showDashboard();
-                loadUserData();
-                return true;
-            } catch (e) {
-                console.error('Invalid user data');
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('user');
+                const user = localStorage.getItem('user');
+                
+                if (!authToken) {
+                    return false;
+                }
+                
+                if (user) {
+                    try {
+                        currentUser = JSON.parse(user);
+                        showDashboard();
+                        loadUserData();
+                        return true;
+                    } catch (e) {
+                        console.error('Invalid user data');
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('user');
+                    }
+                }
+                
+                return false;
+                
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                return false;
             }
         }
-        
-        return false;
-        
-    } catch (error) {
-        console.error('Auth check failed:', error);
-        return false;
-    }
-}
-        
-        // For now, skip the verify endpoint since it doesn't exist
-        // Just check if we have valid stored credentials
-        if (user) {
-            try {
-                currentUser = JSON.parse(user);
+
+        async function login(email, password) {
+            // Check demo accounts first
+            if ((email === 'joseph@affiniti.com' || email === 'aaron@affiniti.com') && password === 'demo123') {
+                currentUser = {
+                    email: email,
+                    company: 'Affiniti Finance',
+                    role: 'client'
+                };
+                authToken = 'demo-token';
+                localStorage.setItem('authToken', authToken);
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                
                 showDashboard();
                 loadUserData();
+                hideModal('loginModal');
                 return true;
-            } catch (e) {
-                console.error('Invalid user data');
+            }
+            
+            // Try API for other accounts
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    currentUser = data.user;
+                    
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showDashboard();
+                    loadUserData();
+                    hideModal('loginModal');
+                    return true;
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Login failed');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+                return false;
             }
         }
-        
-        // If no valid user data, clear auth
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        return false;
-        
-    } catch (error) {
-        console.error('Auth check failed:', error);
-        return false;
-    }
-}
 
-async function login(email, password) {
-    // Check demo accounts FIRST for instant login
-    if ((email === 'joseph@affiniti.com' || email === 'aaron@affiniti.com') && password === 'demo123') {
-        currentUser = {
-            email: email,
-            company: 'Affiniti Finance',
-            role: 'client'
-        };
-        authToken = 'demo-token';
-        localStorage.setItem('authToken', authToken);
-        localStorage.setItem('user', JSON.stringify(currentUser));
-        
-        showDashboard();
-        loadUserData();
-        hideModal('loginModal');
-        return true;
-    }
-    
-    // Try API for other accounts
-    try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            authToken = data.token;
-            currentUser = data.user;
-            
-            localStorage.setItem('authToken', authToken);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            
-            showDashboard();
-            loadUserData();
-            hideModal('loginModal');
-            return true;
-        } else {
-            const error = await response.json();
-            alert(error.message || 'Login failed');
-            return false;
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        alert('Login failed. Please try again.');
-        return false;
-    }
-}
-    } catch (error) {
-        console.error('Login error:', error);
-  
-        if ((email === 'joseph@affiniti.com' || email === 'aaron@affiniti.com') && password === 'demo123') {
-            currentUser = {
-                email: email,
-                company: 'Affiniti Finance',
-                role: 'client'
-        };
-        authToken = 'demo-token';
-        localStorage.setItem('authToken', authToken);
-        localStorage.setItem('user', JSON.stringify(currentUser));
-        
-        showDashboard();
-        loadUserData();
-        hideModal('loginModal');
-        return true;
-    }
-    
-    alert('Login failed. Please try again.');
-    return false;
-}
-
-}
         async function register(companyName, email, password) {
             try {
                 const response = await fetch(`${API_URL}/auth/register`, {
@@ -390,9 +343,10 @@ async function login(email, password) {
                     authToken = data.token;
                     currentUser = data.user;
                     localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     hideRegister();
                     showDashboard();
-                    showPricing(); // Show pricing after registration
+                    showPricing();
                 } else {
                     const error = await response.json();
                     alert(error.error || 'Registration failed');
@@ -402,119 +356,26 @@ async function login(email, password) {
             }
         }
 
-        // UI functions
-        function showLogin() {
-    document.getElementById('loginModal').classList.remove('hidden');
-}
-
-function showRegister() {
-    document.getElementById('registerModal').classList.remove('hidden');
-}
-
-function showDashboard() {
-    document.getElementById('landingPage').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-}
-
-function hideModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-}
-
-        function showPricing() {
-            // In production, this would navigate to a pricing page or show a modal
-            alert('Pricing page would be shown here');
-        }
-
-        function logout() {
-            localStorage.removeItem('authToken');
-            authToken = null;
-            currentUser = null;
-            location.reload();
-        }
-
-        // Load user data and requests
-         async function loadUserData() {
-    try {
-        // Skip API calls for demo accounts
-        if (authToken === 'demo-token') {
-            document.getElementById('userEmail').textContent = currentUser.email;
-            document.getElementById('creditsDisplay').textContent = 'Demo Account';
-            
-            // Show demo data in requests list
-            document.getElementById('requestsList').innerHTML = `
-                <div class="text-gray-500">
-                    <p>Demo Mode - Your verification requests will appear here</p>
-                    <p class="text-sm mt-2">23 verifications completed for Affiniti</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Original API code continues here...
-        const subResponse = await fetch(`${API_URL}/billing/subscription`, {
-
-        function displayRequests(requests) {
-            const container = document.getElementById('requestsList');
-            
-            if (requests.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No verification requests yet.</p>';
-                return;
-            }
-            
-            container.innerHTML = requests.map(req => {
-                const statusColor = req.status === 'completed' ? 'green' : 
-                                  req.status === 'failed' ? 'red' : 'yellow';
-                const riskColor = req.risk_level === 'HIGH' ? 'red' :
-                                req.risk_level === 'MEDIUM' ? 'yellow' : 'green';
-                
-                return `
-                    <div class="border rounded-lg p-4 ${req.status === 'completed' ? 'cursor-pointer hover:shadow-md' : ''}"
-                         ${req.status === 'completed' ? `onclick="viewBusinessDetails(${req.id})"` : ''}>
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-semibold">${req.business_name}</h3>
-                                <p class="text-sm text-gray-600">EIN: ${req.ein}</p>
-                                <p class="text-xs text-gray-500">
-                                    Requested: ${new Date(req.created_at).toLocaleDateString()}
-                                </p>
-                            </div>
-                            <div class="text-right">
-                                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800">
-                                    ${req.status.toUpperCase()}
-                                </span>
-                                ${req.status === 'completed' ? `
-                                    <div class="mt-2">
-                                        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-${riskColor}-100 text-${riskColor}-800">
-                                            ${req.risk_level} RISK
-                                        </span>
-                                        <p class="text-sm font-semibold mt-1">Score: ${req.risk_score}/100</p>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function viewBusinessDetails(requestId) {
+        // Load user data
+        async function loadUserData() {
             try {
-                const response = await fetch(`${API_URL}/business/${requestId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const business = await response.json();
-                    // Show detailed business view
-                    alert(`Business details would be shown here for ${business.business_name}`);
+                if (authToken === 'demo-token') {
+                    document.getElementById('userEmail').textContent = currentUser.email;
+                    document.getElementById('creditsDisplay').textContent = 'Demo Account';
+                    
+                    document.getElementById('requestsList').innerHTML = `
+                        <div class="text-gray-500">
+                            <p>Demo Mode - Your verification requests will appear here</p>
+                            <p class="text-sm mt-2">23 verifications completed for Affiniti</p>
+                        </div>
+                    `;
+                    return;
                 }
+                
+                // API calls for real accounts would go here
+                
             } catch (error) {
-                console.error('Failed to load business details:', error);
+                console.error('Failed to load user data:', error);
             }
         }
 
@@ -534,41 +395,13 @@ function hideModal(modalId) {
                     const data = await response.json();
                     alert('Verification request submitted successfully!');
                     document.getElementById('verifyForm').reset();
-                    loadUserData(); // Reload to show new request
+                    loadUserData();
                 } else {
                     const error = await response.json();
                     alert(error.error || 'Verification request failed');
                 }
             } catch (error) {
                 alert('Failed to submit request. Please try again.');
-            }
-        }
-
-        // Stripe checkout
-        async function selectPlan(priceId) {
-            if (!authToken) {
-                showRegister();
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/billing/create-checkout-session`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ priceId })
-                });
-                
-                if (response.ok) {
-                    const { url } = await response.json();
-                    window.location.href = url;
-                } else {
-                    alert('Failed to start checkout. Please try again.');
-                }
-            } catch (error) {
-                alert('Checkout failed. Please try again.');
             }
         }
 
@@ -595,43 +428,5 @@ function hideModal(modalId) {
             await requestVerification(ein, businessName);
         });
     </script>
-// Admin Panel Integration
-function loadAdminPanel() {
-    const adminHTML = `
-        <div class="min-h-screen">
-            <!-- Copy ALL content from admin.html between <body> tags here -->
-            <!-- I'll provide the full content below -->
-        </div>
-    `;
-    
-    document.getElementById('adminPanel').innerHTML = adminHTML;
-    
-    // Initialize admin scripts
-    initializeAdminPanel();
-}
-
-function initializeAdminPanel() {
-    // Copy ALL JavaScript from admin.html here
-    // I'll provide this below
-}
-
-// Check URL hash on load
-if (window.location.hash === '#admin') {
-    document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    loadAdminPanel();
-}
-
-// Listen for hash changes
-window.addEventListener('hashchange', () => {
-    if (window.location.hash === '#admin') {
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        loadAdminPanel();
-    } else {
-        document.getElementById('mainApp').style.display = 'block';
-        document.getElementById('adminPanel').style.display = 'none';
-    }
-});
 </body>
 </html>
