@@ -209,11 +209,11 @@
 
         // Check authentication on load
         if (authToken) {
-            checkAuth();
+            ∑checkAuth();
         }
 
         // Authentication functions
-        async function checkAuth() {
+	async function checkAuth() {
     try {
         const authToken = localStorage.getItem('authToken');
         const user = localStorage.getItem('user');
@@ -221,6 +221,28 @@
         if (!authToken) {
             return false;
         }
+        
+        // Skip API check entirely - just use local storage
+        if (user) {
+            try {
+                currentUser = JSON.parse(user);
+                showDashboard();
+                loadUserData();
+                return true;
+            } catch (e) {
+                console.error('Invalid user data');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+            }
+        }
+        
+        return false;
+        
+    } catch (error) {
+        console.error('Auth check failed:', error);
+        return false;
+    }
+}
         
         // For now, skip the verify endpoint since it doesn't exist
         // Just check if we have valid stored credentials
@@ -246,7 +268,25 @@
     }
 }
 
-        async function login(email, password) {
+async function login(email, password) {
+    // Check demo accounts FIRST for instant login
+    if ((email === 'joseph@affiniti.com' || email === 'aaron@affiniti.com') && password === 'demo123') {
+        currentUser = {
+            email: email,
+            company: 'Affiniti Finance',
+            role: 'client'
+        };
+        authToken = 'demo-token';
+        localStorage.setItem('authToken', authToken);
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        
+        showDashboard();
+        loadUserData();
+        hideModal('loginModal');
+        return true;
+    }
+    
+    // Try API for other accounts
     try {
         const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
@@ -261,7 +301,6 @@
             authToken = data.token;
             currentUser = data.user;
             
-            // Make sure these two lines exist:
             localStorage.setItem('authToken', authToken);
             localStorage.setItem('user', JSON.stringify(data.user));
             
@@ -274,7 +313,12 @@
             alert(error.message || 'Login failed');
             return false;
         }
-
+    } catch (error) {
+        console.error('Login error:', error);
+        alert('Login failed. Please try again.');
+        return false;
+    }
+}
     } catch (error) {
         console.error('Login error:', error);
   
@@ -368,44 +412,25 @@
         }
 
         // Load user data and requests
-        async function loadUserData() {
-            try {
-                // Load subscription status
-                const subResponse = await fetch(`${API_URL}/billing/subscription`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (subResponse.ok) {
-                    const subData = await subResponse.json();
-                    document.getElementById('creditsDisplay').textContent = 
-                        `Credits: ${subData.credits_remaining || 0}`;
-                    
-                    if (subData.subscription_status !== 'active') {
-                        document.getElementById('subscriptionAlert').classList.remove('hidden');
-                    }
-                }
-                
-                // Load requests
-                const reqResponse = await fetch(`${API_URL}/business/requests`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (reqResponse.ok) {
-                    const requests = await reqResponse.json();
-                    displayRequests(requests);
-                }
-                
-                if (currentUser) {
-                    document.getElementById('userEmail').textContent = currentUser.email;
-                }
-            } catch (error) {
-                console.error('Failed to load user data:', error);
-            }
+         async function loadUserData() {
+    try {
+        // Skip API calls for demo accounts
+        if (authToken === 'demo-token') {
+            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('creditsDisplay').textContent = 'Demo Account';
+            
+            // Show demo data in requests list
+            document.getElementById('requestsList').innerHTML = `
+                <div class="text-gray-500">
+                    <p>Demo Mode - Your verification requests will appear here</p>
+                    <p class="text-sm mt-2">23 verifications completed for Affiniti</p>
+                </div>
+            `;
+            return;
         }
+        
+        // Original API code continues here...
+        const subResponse = await fetch(`${API_URL}/billing/subscription`, {
 
         function displayRequests(requests) {
             const container = document.getElementById('requestsList');
