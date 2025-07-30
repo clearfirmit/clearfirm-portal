@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClearFirm - Business Intelligence Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'clearfirm-green': '#6B7B3A',
+                        'clearfirm-light-green': '#85855A',
+                        'clearfirm-ocean': '#071F52',
+                        'clearfirm-salmon': '#AA523C',
+                        'clearfirm-sky': '#A2B8E7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-clearfirm-green">ClearFirm</h1>
+                    <span class="ml-3 text-sm text-gray-500">API Console</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Demo Account</span>
+                    <span class="text-sm font-medium text-gray-900">joseph@affiniti.com</span>
+                    <button class="text-sm text-gray-500 hover:text-gray-700">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- API Notification Banner -->
+        <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg shadow-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <h3 class="text-sm font-medium text-green-800">Latest API Data Available</h3>
+                    <div class="mt-1 text-sm text-green-700">
+                        <p><strong>LTC RX INC</strong> data is now accessible via API endpoints. Request ID: <code class="bg-green-100 px-1 rounded">AFT-1753816145142-HOMHVX</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-clearfirm-green bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-clearfirm-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">28</div>
+                        <div class="text-sm text-gray-600">Completed Requests</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">1.8h</div>
+                        <div class="text-sm text-gray-600">Avg Processing Time</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">142ms</div>
+                        <div class="text-sm text-gray-600">API Response Time</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">$700</div>
+                        <div class="text-sm text-gray-600">Monthly Usage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Request History -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">API Request History</h2>
+                    <div class="flex space-x-2">
+                        <button class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md border">Export</button>
+                        <button class="text-sm text-clearfirm-green hover:text-clearfirm-light-green px-3 py-1 rounded-md border border-clearfirm-green">Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">API Access</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Latest Request - LTC RX -->
+                            <tr class="bg-green-50 border-l-4 border-l-green-400">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">LTC RX INC</div>
+                                        <div class="text-sm text-gray-500">EIN: 27-1251416</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753816145142-HOMHVX</code>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
+                                        Completed
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="text-green-600 font-medium">Just now</span>
+                                    <div class="text-xs text-gray-500">July 30, 4:28 AM</div>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <button onclick="copyEndpoint('AFT-1753816145142-HOMHVX')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
+                                        Copy API Call
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyEndpoint(requestId) {
+            const apiCall = 'curl -X GET "https://api.getclearfirm.com/v1/requests/' + requestId + '" -H "Authorization: Bearer aft_prod_8a983877-71d2-4719-81c6-b21580ce781e"';
+            navigator.clipboard.writeText(apiCall).then(() => {
+                alert('API call copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
