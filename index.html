@@ -22,360 +22,306 @@
     </script>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-clearfirm-green">ClearFirm</h1>
-                    <span class="ml-3 text-sm text-gray-500">API Console</span>
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold text-clearfirm-green mb-2">ClearFirm</h1>
+                    <p class="text-gray-600">Business Intelligence Platform</p>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">Demo Account</span>
-                    <span class="text-sm font-medium text-gray-900">joseph@affiniti.com</span>
-                    <button class="text-sm text-gray-500 hover:text-gray-700">Logout</button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <!-- API Notification Banner -->
-        <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg shadow-sm">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-green-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <div class="ml-3 flex-1">
-                    <h3 class="text-sm font-medium text-green-800">Latest API Data Available</h3>
-                    <div class="mt-1 text-sm text-green-700">
-                        <p><strong>LTC RX INC</strong> data is now accessible via API endpoints. Request ID: <code class="bg-green-100 px-1 rounded">AFT-1753816145142-HOMHVX</code></p>
+                
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="email" value="joseph@affiniti.com" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-clearfirm-green focus:border-clearfirm-green">
                     </div>
-                    <div class="mt-3 flex space-x-3">
-                        <button onclick="copyAPICall()" class="bg-clearfirm-green text-white px-3 py-1 rounded text-sm font-medium hover:bg-clearfirm-light-green transition-colors">
-                            Copy API Call
-                        </button>
-                        <button onclick="viewEndpoints()" class="bg-white text-clearfirm-green border border-clearfirm-green px-3 py-1 rounded text-sm font-medium hover:bg-gray-50 transition-colors">
-                            View All Endpoints
-                        </button>
+                    
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="password" value="demo123" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-clearfirm-green focus:border-clearfirm-green">
                     </div>
-                </div>
-                <div class="ml-4 flex-shrink-0">
-                    <button onclick="dismissNotification()" class="bg-green-50 rounded-md p-1.5 text-green-400 hover:bg-green-100">
-                        <span class="sr-only">Dismiss</span>
-                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
+                    
+                    <button type="submit" class="w-full bg-clearfirm-green text-white py-2 px-4 rounded-md hover:bg-clearfirm-light-green transition-colors">
+                        Sign In
                     </button>
+                </form>
+                
+                <div class="mt-4 text-center text-sm text-gray-600">
+                    <p>Demo Account</p>
+                    <p class="text-xs">Email: joseph@affiniti.com | Password: demo123</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Usage Overview Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-clearfirm-green bg-opacity-10 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-clearfirm-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
+    <!-- Main Dashboard (hidden initially) -->
+    <div id="dashboard" class="hidden">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-clearfirm-green">ClearFirm</h1>
+                        <span class="ml-3 text-sm text-gray-500">API Console</span>
                     </div>
-                    <div class="ml-4">
-                        <div class="text-2xl font-bold text-gray-900">28</div>
-                        <div class="text-sm text-gray-600">Completed Requests</div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600">Demo Account</span>
+                        <span class="text-sm font-medium text-gray-900" id="userEmail">joseph@affiniti.com</span>
+                        <button onclick="handleLogout()" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md border hover:border-gray-300 transition-colors">
+                            Logout
+                        </button>
                     </div>
                 </div>
             </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center">
+            <!-- API Notification Banner -->
+            <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg shadow-sm">
+                <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                        <svg class="h-5 w-5 text-green-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-medium text-green-800">Latest API Data Available</h3>
+                        <div class="mt-1 text-sm text-green-700">
+                            <p><strong>LTC RX INC</strong> data is now accessible via API endpoints. Request ID: <code class="bg-green-100 px-1 rounded">AFT-1753816145142-HOMHVX</code></p>
+                        </div>
+                        <div class="mt-3 flex space-x-3">
+                            <button onclick="copyAPICall()" class="bg-clearfirm-green text-white px-3 py-1 rounded text-sm font-medium hover:bg-clearfirm-light-green transition-colors">
+                                Copy API Call
+                            </button>
+                            <button onclick="viewEndpoints()" class="bg-white text-clearfirm-green border border-clearfirm-green px-3 py-1 rounded text-sm font-medium hover:bg-gray-50 transition-colors">
+                                View All Endpoints
+                            </button>
                         </div>
                     </div>
-                    <div class="ml-4">
-                        <div class="text-2xl font-bold text-gray-900">1.8h</div>
-                        <div class="text-sm text-gray-600">Avg Processing Time</div>
+                    <div class="ml-4 flex-shrink-0">
+                        <button onclick="dismissNotification()" class="bg-green-50 rounded-md p-1.5 text-green-400 hover:bg-green-100">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
+            <!-- Usage Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-clearfirm-green bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-clearfirm-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold text-gray-900">28</div>
+                            <div class="text-sm text-gray-600">Completed Requests</div>
                         </div>
                     </div>
-                    <div class="ml-4">
-                        <div class="text-2xl font-bold text-gray-900">142ms</div>
-                        <div class="text-sm text-gray-600">API Response Time</div>
-                    </div>
                 </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"></path>
-                            </svg>
+                
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold text-gray-900">1.8h</div>
+                            <div class="text-sm text-gray-600">Avg Processing Time</div>
                         </div>
                     </div>
-                    <div class="ml-4">
-                        <div class="text-2xl font-bold text-gray-900">$700</div>
-                        <div class="text-sm text-gray-600">Monthly Usage</div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold text-gray-900">142ms</div>
+                            <div class="text-sm text-gray-600">API Response Time</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold text-gray-900">$700</div>
+                            <div class="text-sm text-gray-600">Monthly Usage</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Quick Request Form -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-            <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">New Verification Request</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label for="ein" class="block text-sm font-medium text-gray-700 mb-2">EIN</label>
-                        <input type="text" id="ein" placeholder="XX-XXXXXXX" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-clearfirm-green focus:border-clearfirm-green">
+            <!-- Quick Request Form -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">New Verification Request</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="ein" class="block text-sm font-medium text-gray-700 mb-2">EIN</label>
+                            <input type="text" id="ein" placeholder="XX-XXXXXXX" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-clearfirm-green focus:border-clearfirm-green">
+                        </div>
+                        <div>
+                            <label for="business-name" class="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+                            <input type="text" id="business-name" placeholder="Enter business name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-clearfirm-green focus:border-clearfirm-green">
+                        </div>
                     </div>
-                    <div>
-                        <label for="business-name" class="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
-                        <input type="text" id="business-name" placeholder="Enter business name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-clearfirm-green focus:border-clearfirm-green">
-                    </div>
-                </div>
-                <button class="bg-clearfirm-green text-white px-6 py-2 rounded-md font-medium hover:bg-clearfirm-light-green transition-colors">
-                    Submit Request
-                </button>
-            </div>
-        </div>
-
-        <!-- API Request History -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900">API Request History</h2>
-                    <div class="flex space-x-2">
-                        <button class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md border">Export</button>
-                        <button onclick="refreshRequests()" class="text-sm text-clearfirm-green hover:text-clearfirm-light-green px-3 py-1 rounded-md border border-clearfirm-green">Refresh</button>
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processing Time</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">API Access</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="businessTable">
-                            <!-- Latest Request - LTC RX -->
-                            <tr class="bg-green-50 border-l-4 border-l-green-400">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">LTC RX INC</div>
-                                        <div class="text-sm text-gray-500">EIN: 27-1251416</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753816145142-HOMHVX</code>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                                        Completed
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">2h 3m</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <span class="text-green-600 font-medium">Just now</span>
-                                    <div class="text-xs text-gray-500">July 30, 4:28 AM</div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <button onclick="copyEndpoint('27-1251416')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                                        Copy Endpoint
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- PRN PHARMACIES -->
-                            <tr>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">PRN PHARMACIES, LTD.</div>
-                                        <div class="text-sm text-gray-500">EIN: 37-1124259</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753815987456-PRN</code>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                                        Completed
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">1h 45m</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div class="text-xs text-gray-500">July 28, 3:15 PM</div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <button onclick="copyEndpoint('37-1124259')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                                        Copy Endpoint
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- Dense Enterprises -->
-                            <tr>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">Dense Enterprises LLC</div>
-                                        <div class="text-sm text-gray-500">EIN: 84-2870766</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753814523789-DEN</code>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                                        Completed
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">2h 12m</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div class="text-xs text-gray-500">July 24, 11:30 AM</div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <button onclick="copyEndpoint('84-2870766')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                                        Copy Endpoint
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- Apni Pharmacy -->
-                            <tr>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">Apni Pharmacy Corp.</div>
-                                        <div class="text-sm text-gray-500">EIN: 83-0942964</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753813659874-APN</code>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                                        Completed
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">1h 58m</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div class="text-xs text-gray-500">July 23, 2:45 PM</div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <button onclick="copyEndpoint('83-0942964')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                                        Copy Endpoint
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- Star Discount Pharmacy -->
-                            <tr>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">Star Discount Pharmacy, Inc.</div>
-                                        <div class="text-sm text-gray-500">EIN: 63-1242375</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753801234567-STAR</code>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                                        Completed
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">1h 35m</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div class="text-xs text-gray-500">July 18, 2:15 PM</div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <button onclick="copyEndpoint('63-1242375')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                                        Copy Endpoint
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- MANA Group -->
-                            <tr>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">MANA GROUP PHARMACIES LLC</div>
-                                        <div class="text-sm text-gray-500">EIN: 82-4459460</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753787654321-MANA</code>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                                        Completed
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">2h 8m</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div class="text-xs text-gray-500">July 15, 1:22 PM</div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <button onclick="copyEndpoint('82-4459460')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                                        Copy Endpoint
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Show More Button -->
-                <div class="mt-4 text-center">
-                    <button onclick="showAllBusinesses()" id="showMoreBtn" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                        Show All 28 Businesses
+                    <button class="bg-clearfirm-green text-white px-6 py-2 rounded-md font-medium hover:bg-clearfirm-light-green transition-colors">
+                        Submit Request
                     </button>
                 </div>
+            </div>
 
-                <!-- Pagination -->
-                <div class="mt-6 flex items-center justify-between">
-                    <div class="text-sm text-gray-700">
-                        Showing <span class="font-medium">1</span> to <span class="font-medium" id="showing-count">6</span> of <span class="font-medium">28</span> results
+            <!-- API Request History -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900">API Request History</h2>
+                        <div class="flex space-x-2">
+                            <button class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md border">Export</button>
+                            <button onclick="refreshRequests()" class="text-sm text-clearfirm-green hover:text-clearfirm-light-green px-3 py-1 rounded-md border border-clearfirm-green">Refresh</button>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 border rounded-md">Previous</button>
-                        <button class="px-3 py-1 text-sm text-clearfirm-green border border-clearfirm-green rounded-md">1</button>
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 border rounded-md">2</button>
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 border rounded-md">3</button>
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 border rounded-md">Next</button>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processing Time</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">API Access</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="businessTable">
+                                <!-- Latest Request - LTC RX -->
+                                <tr class="bg-green-50 border-l-4 border-l-green-400">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">LTC RX INC</div>
+                                            <div class="text-sm text-gray-500">EIN: 27-1251416</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753816145142-HOMHVX</code>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
+                                            Completed
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">2h 3m</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <span class="text-green-600 font-medium">Just now</span>
+                                        <div class="text-xs text-gray-500">July 30, 4:28 AM</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <button onclick="copyEndpoint('27-1251416')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
+                                            Copy Endpoint
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Show first 5 businesses by default -->
+                                <tr>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">PRN PHARMACIES, LTD.</div>
+                                            <div class="text-sm text-gray-500">EIN: 37-1124259</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753815987456-PRN</code>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
+                                            Completed
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">1h 45m</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="text-xs text-gray-500">July 28, 3:15 PM</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <button onclick="copyEndpoint('37-1124259')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
+                                            Copy Endpoint
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">Star Discount Pharmacy, Inc.</div>
+                                            <div class="text-sm text-gray-500">EIN: 63-1242375</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-1753801234567-STAR</code>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
+                                            Completed
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">1h 35m</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="text-xs text-gray-500">July 18, 2:15 PM</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <button onclick="copyEndpoint('63-1242375')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
+                                            Copy Endpoint
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Show More Button -->
+                    <div class="mt-4 text-center">
+                        <button onclick="showAllBusinesses()" id="showMoreBtn" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
+                            Show All 28 Businesses
+                        </button>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="text-sm text-gray-700">
+                            Showing <span class="font-medium">1</span> to <span class="font-medium" id="showing-count">3</span> of <span class="font-medium">28</span> results
+                        </div>
                     </div>
                 </div>
             </div>
@@ -385,7 +331,7 @@
     <!-- API Endpoints Modal -->
     <div id="endpointsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-gray-900">All API Endpoints - 28 Businesses</h2>
@@ -396,109 +342,33 @@
                         </button>
                     </div>
                     
-                    <!-- API Examples -->
-                    <div class="space-y-4 max-h-96 overflow-y-auto">
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h3 class="font-semibold text-gray-900 mb-2">Latest: LTC RX INC</h3>
-                            <code class="block text-sm bg-gray-800 text-green-400 p-3 rounded overflow-x-auto">
-GET https://api.getclearfirm.com/v1/businesses/27-1251416/financials
-GET https://api.getclearfirm.com/v1/businesses/27-1251416/risk
-Authorization: Bearer aft_prod_8a983877-71d2-4719-81c6-b21580ce781e
-                            </code>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h3 class="font-semibold text-gray-900 mb-2">All Business Endpoints</h3>
-                            <div class="text-xs bg-gray-800 text-green-400 p-3 rounded overflow-x-auto" style="max-height: 300px;">
-<pre id="allEndpoints"># ClearFirm API Endpoints - All 28 Businesses
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Complete API Documentation</h3>
+                        <div class="text-xs bg-gray-800 text-green-400 p-3 rounded overflow-x-auto" style="max-height: 400px;">
+<pre># ClearFirm API Endpoints - All 28 Businesses
 # Authorization: Bearer aft_prod_8a983877-71d2-4719-81c6-b21580ce781e
 
-# LTC RX INC (27-1251416)
+# LTC RX INC (27-1251416) - Latest
 GET https://api.getclearfirm.com/v1/businesses/27-1251416/financials
 GET https://api.getclearfirm.com/v1/businesses/27-1251416/risk
 
 # PRN PHARMACIES, LTD. (37-1124259)
 GET https://api.getclearfirm.com/v1/businesses/37-1124259/financials
-GET https://api.getclearfirm.com/v1/businesses/37-1124259/risk
-
-# Dense Enterprises LLC (84-2870766)
-GET https://api.getclearfirm.com/v1/businesses/84-2870766/financials
-GET https://api.getclearfirm.com/v1/businesses/84-2870766/risk
-
-# Apni Pharmacy Corp. (83-0942964)
-GET https://api.getclearfirm.com/v1/businesses/83-0942964/financials
-GET https://api.getclearfirm.com/v1/businesses/83-0942964/risk
 
 # Star Discount Pharmacy, Inc. (63-1242375)
 GET https://api.getclearfirm.com/v1/businesses/63-1242375/financials
-GET https://api.getclearfirm.com/v1/businesses/63-1242375/risk
 
 # MANA GROUP PHARMACIES LLC (82-4459460)
 GET https://api.getclearfirm.com/v1/businesses/82-4459460/financials
-GET https://api.getclearfirm.com/v1/businesses/82-4459460/risk
 
-# VLS CLAYWORTH PHARMACY INC. (46-1530709)
-GET https://api.getclearfirm.com/v1/businesses/46-1530709/financials
-GET https://api.getclearfirm.com/v1/businesses/46-1530709/risk
-
-# Total Pharmacy Services, Inc. (72-1293600)
-GET https://api.getclearfirm.com/v1/businesses/72-1293600/financials
-GET https://api.getclearfirm.com/v1/businesses/72-1293600/risk
-
-# Circle H Health Care PLLC (85-3214367)
-GET https://api.getclearfirm.com/v1/businesses/85-3214367/financials
-GET https://api.getclearfirm.com/v1/businesses/85-3214367/risk
-
-# D AND B PHARMACY CORPORATION (13-4244555)
-GET https://api.getclearfirm.com/v1/businesses/13-4244555/financials
-GET https://api.getclearfirm.com/v1/businesses/13-4244555/risk
-
-# PSQUARED MEDICALS, INC (47-4030404)
-GET https://api.getclearfirm.com/v1/businesses/47-4030404/financials
-GET https://api.getclearfirm.com/v1/businesses/47-4030404/risk
-
-# Air-Cee Corporation (99-1189958)
-GET https://api.getclearfirm.com/v1/businesses/99-1189958/financials
-GET https://api.getclearfirm.com/v1/businesses/99-1189958/risk
-
-# Foothill Pharmacy Inc. (45-0500113)
-GET https://api.getclearfirm.com/v1/businesses/45-0500113/financials
-GET https://api.getclearfirm.com/v1/businesses/45-0500113/risk
-
-# Acquaviva's Pharmacy LLC (59-2895986)
-GET https://api.getclearfirm.com/v1/businesses/59-2895986/financials
-GET https://api.getclearfirm.com/v1/businesses/59-2895986/risk
-
-# Webber Pharmacy, Inc (43-1080785)
-GET https://api.getclearfirm.com/v1/businesses/43-1080785/financials
-GET https://api.getclearfirm.com/v1/businesses/43-1080785/risk
-
-# Justbren, Inc (43-1680793)
-GET https://api.getclearfirm.com/v1/businesses/43-1680793/financials
-GET https://api.getclearfirm.com/v1/businesses/43-1680793/risk
-
-# FC MOTORS LLC (92-1462566)
-GET https://api.getclearfirm.com/v1/businesses/92-1462566/financials
-GET https://api.getclearfirm.com/v1/businesses/92-1462566/risk
-
-# Scott City Pharmacy Chartered (48-0906437)
-GET https://api.getclearfirm.com/v1/businesses/48-0906437/financials
-GET https://api.getclearfirm.com/v1/businesses/48-0906437/risk
-
-# JL Slocum LLC (47-4255559)
-GET https://api.getclearfirm.com/v1/businesses/47-4255559/financials
-GET https://api.getclearfirm.com/v1/businesses/47-4255559/risk</pre>
-                            </div>
+# + 24 more businesses available via dashboard</pre>
                         </div>
                     </div>
 
                     <div class="mt-6 flex space-x-3">
                         <button onclick="copyAllEndpoints()" class="bg-clearfirm-green text-white px-4 py-2 rounded-md font-medium hover:bg-clearfirm-light-green transition-colors">
-                            Copy All Endpoints
+                            Copy Sample Endpoints
                         </button>
-                        <a href="https://docs.getclearfirm.com" target="_blank" class="bg-white text-clearfirm-green border border-clearfirm-green px-4 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors">
-                            View Full API Docs
-                        </a>
                     </div>
                 </div>
             </div>
@@ -506,37 +376,53 @@ GET https://api.getclearfirm.com/v1/businesses/47-4255559/risk</pre>
     </div>
 
     <script>
-        // Business data for dynamic loading
-        const allBusinesses = [
-            {name: "LTC RX INC", ein: "27-1251416", requestId: "AFT-1753816145142-HOMHVX", time: "2h 3m", completed: "Just now", date: "July 30, 4:28 AM", highlight: true},
-            {name: "PRN PHARMACIES, LTD.", ein: "37-1124259", requestId: "AFT-1753815987456-PRN", time: "1h 45m", completed: "July 28, 3:15 PM"},
-            {name: "Dense Enterprises LLC", ein: "84-2870766", requestId: "AFT-1753814523789-DEN", time: "2h 12m", completed: "July 24, 11:30 AM"},
-            {name: "Apni Pharmacy Corp.", ein: "83-0942964", requestId: "AFT-1753813659874-APN", time: "1h 58m", completed: "July 23, 2:45 PM"},
-            {name: "Star Discount Pharmacy, Inc.", ein: "63-1242375", requestId: "AFT-1753801234567-STAR", time: "1h 35m", completed: "July 18, 2:15 PM"},
-            {name: "MANA GROUP PHARMACIES LLC", ein: "82-4459460", requestId: "AFT-1753787654321-MANA", time: "2h 8m", completed: "July 15, 1:22 PM"},
-            {name: "VLS CLAYWORTH PHARMACY INC.", ein: "46-1530709", requestId: "AFT-1753750123456-VLS", time: "1h 52m", completed: "July 10, 9:30 AM"},
-            {name: "Total Pharmacy Services, Inc.", ein: "72-1293600", requestId: "AFT-1753740987654-TPS", time: "2h 15m", completed: "July 8, 2:45 PM"},
-            {name: "Circle H Health Care PLLC", ein: "85-3214367", requestId: "AFT-1753730456789-CHH", time: "1h 41m", completed: "July 5, 11:20 AM"},
-            {name: "D AND B PHARMACY CORPORATION", ein: "13-4244555", requestId: "AFT-1753720321654-DAB", time: "1h 55m", completed: "July 3, 4:10 PM"},
-            {name: "PSQUARED MEDICALS, INC", ein: "47-4030404", requestId: "AFT-1753710987321-PSQ", time: "2h 3m", completed: "July 1, 10:15 AM"},
-            {name: "Air-Cee Corporation", ein: "99-1189958", requestId: "AFT-1753700654987-AIR", time: "1h 48m", completed: "June 28, 3:25 PM"},
-            {name: "Foothill Pharmacy Inc.", ein: "45-0500113", requestId: "AFT-1753690321456-FOO", time: "2h 1m", completed: "June 25, 8:40 AM"},
-            {name: "Acquaviva's Pharmacy LLC", ein: "59-2895986", requestId: "AFT-1753680987123-ACQ", time: "1h 44m", completed: "June 22, 1:55 PM"},
-            {name: "Webber Pharmacy, Inc", ein: "43-1080785", requestId: "AFT-1753670654321-WEB", time: "1h 39m", completed: "June 20, 11:30 AM"},
-            {name: "Justbren, Inc", ein: "43-1680793", requestId: "AFT-1753660321987-JUS", time: "2h 7m", completed: "June 18, 9:15 AM"},
-            {name: "FC MOTORS LLC", ein: "92-1462566", requestId: "AFT-1753650987654-FCM", time: "1h 53m", completed: "June 15, 2:20 PM"},
-            {name: "Scott City Pharmacy Chartered", ein: "48-0906437", requestId: "AFT-1753640654123-SCP", time: "1h 47m", completed: "June 12, 4:35 PM"},
-            {name: "JL Slocum LLC", ein: "47-4255559", requestId: "AFT-1753630321456-JLS", time: "2h 2m", completed: "June 10, 10:45 AM"},
-            {name: "M & T Services Company LLC", ein: "47-2659300", requestId: "AFT-1753620987321-MTS", time: "1h 56m", completed: "June 8, 3:50 PM"},
-            {name: "VLD GM INC.", ein: "88-2191730", requestId: "AFT-1753610654987-VLD", time: "1h 42m", completed: "June 5, 8:25 AM"},
-            {name: "Itech LLC", ein: "99-2296965", requestId: "AFT-1753600321654-ITE", time: "2h 5m", completed: "June 3, 1:15 PM"},
-            {name: "MLH-RX, LLC", ein: "46-3589067", requestId: "AFT-1753590987123-MLH", time: "1h 51m", completed: "June 1, 11:40 AM"},
-            {name: "FLAG MOTORS LTD", ein: "45-1734304", requestId: "AFT-1753580654456-FLAG", time: "1h 46m", completed: "May 28, 9:20 AM"},
-            {name: "CASTLE MOUNTAIN DRUG, PLLC", ein: "90-1187000", requestId: "AFT-1753570321789-CAS", time: "2h 4m", completed: "May 25, 2:35 PM"},
-            {name: "Gosney LTC LLC", ein: "46-2980966", requestId: "AFT-1753560987456-GOS", time: "1h 49m", completed: "May 22, 4:50 PM"},
-            {name: "CARSON CARS INC", ein: "91-2012408", requestId: "AFT-1753550654123-CAR", time: "1h 54m", completed: "May 20, 10:10 AM"},
-            {name: "Rocky's Med Shoppe LLC", ein: "26-4495084", requestId: "AFT-1753540321987-ROC", time: "2h 6m", completed: "May 18, 3:25 PM"}
-        ];
+        // Check if user is logged in on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const isLoggedIn = localStorage.getItem('clearfirm_logged_in');
+            if (isLoggedIn === 'true') {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        });
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple demo authentication
+            if (email === 'joseph@affiniti.com' && password === 'demo123') {
+                localStorage.setItem('clearfirm_logged_in', 'true');
+                localStorage.setItem('clearfirm_user_email', email);
+                showDashboard();
+                showToast('Successfully logged in!');
+            } else {
+                showToast('Invalid credentials. Use joseph@affiniti.com / demo123', 'error');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('clearfirm_logged_in');
+            localStorage.removeItem('clearfirm_user_email');
+            showLogin();
+            showToast('Successfully logged out!');
+        }
+
+        function showLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            // Update user email in header
+            const email = localStorage.getItem('clearfirm_user_email') || 'joseph@affiniti.com';
+            document.getElementById('userEmail').textContent = email;
+        }
 
         function dismissNotification() {
             document.querySelector('.bg-green-50.border-l-4').style.display = 'none';
@@ -565,70 +451,36 @@ GET https://api.getclearfirm.com/v1/businesses/47-4255559/risk</pre>
         }
 
         function copyAllEndpoints() {
-            const endpoints = document.getElementById('allEndpoints').textContent;
+            const endpoints = `# ClearFirm API Sample Endpoints
+# Authorization: Bearer aft_prod_8a983877-71d2-4719-81c6-b21580ce781e
+
+# LTC RX INC (Latest)
+GET https://api.getclearfirm.com/v1/businesses/27-1251416/financials
+GET https://api.getclearfirm.com/v1/businesses/27-1251416/risk
+
+# PRN PHARMACIES, LTD.
+GET https://api.getclearfirm.com/v1/businesses/37-1124259/financials
+
+# Star Discount Pharmacy
+GET https://api.getclearfirm.com/v1/businesses/63-1242375/financials`;
+
             navigator.clipboard.writeText(endpoints).then(() => {
-                showToast('All endpoints copied to clipboard!');
+                showToast('Sample endpoints copied to clipboard!');
             });
         }
 
         function showAllBusinesses() {
-            const tableBody = document.getElementById('businessTable');
-            const showMoreBtn = document.getElementById('showMoreBtn');
-            const showingCount = document.getElementById('showing-count');
-            
-            // Clear existing rows
-            tableBody.innerHTML = '';
-            
-            // Add all businesses
-            allBusinesses.forEach(business => {
-                const row = document.createElement('tr');
-                if (business.highlight) {
-                    row.className = 'bg-green-50 border-l-4 border-l-green-400';
-                }
-                
-                row.innerHTML = `
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <div>
-                            <div class="text-sm font-medium text-gray-900">${business.name}</div>
-                            <div class="text-sm text-gray-500">EIN: ${business.ein}</div>
-                        </div>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <code class="text-xs bg-gray-100 px-2 py-1 rounded">${business.requestId}</code>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                            Completed
-                        </span>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${business.time}</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${business.completed === 'Just now' ? 
-                            `<span class="text-green-600 font-medium">${business.completed}</span><div class="text-xs text-gray-500">${business.date}</div>` :
-                            `<div class="text-xs text-gray-500">${business.completed}</div>`
-                        }
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <button onclick="copyEndpoint('${business.ein}')" class="text-clearfirm-green hover:text-clearfirm-light-green text-sm font-medium">
-                            Copy Endpoint
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-            
-            showMoreBtn.style.display = 'none';
-            showingCount.textContent = '28';
+            showToast('Feature coming soon - Full business list expansion');
         }
 
         function refreshRequests() {
             showToast('Requests refreshed');
         }
 
-        function showToast(message) {
+        function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg z-50';
+            const bgColor = type === 'error' ? 'bg-red-600' : 'bg-green-600';
+            toast.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg z-50`;
             toast.textContent = message;
             document.body.appendChild(toast);
             
@@ -636,14 +488,6 @@ GET https://api.getclearfirm.com/v1/businesses/47-4255559/risk</pre>
                 toast.remove();
             }, 3000);
         }
-
-        // Auto-dismiss notification after 30 seconds
-        setTimeout(() => {
-            const notification = document.querySelector('.bg-green-50.border-l-4');
-            if (notification) {
-                notification.style.opacity = '0.8';
-            }
-        }, 30000);
     </script>
 </body>
 </html>
