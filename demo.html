@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClearFirm API Demo - Live Business Intelligence</title>
+    <meta name="description" content="Experience ClearFirm's end-to-end business intelligence API in real-time. The modern alternative to Dun & Bradstreet.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'clearfirm-green': '#6B7B3A',
+                        'clearfirm-ocean': '#071F52',
+                        'clearfirm-salmon': '#AA523C',
+                        'clearfirm-sky': '#A2B8E7',
+                        'clearfirm-eggshell': '#F3F0E8'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .lucide {
+            width: 1em;
+            height: 1em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Lucide Icons as React components
+        const Send = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="m22 2-7 20-4-9-9-4Z"/>
+                <path d="M22 2 11 13"/>
+            </svg>
+        );
+
+        const FileText = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                <path d="M10 9H8"/>
+                <path d="M16 13H8"/>
+                <path d="M16 17H8"/>
+            </svg>
+        );
+
+        const TrendingUp = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
+                <polyline points="16,7 22,7 22,13"/>
+            </svg>
+        );
+
+        const AlertTriangle = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                <path d="M12 9v4"/>
+                <path d="m12 17 .01 0"/>
+            </svg>
+        );
+
+        const CheckCircle = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+        );
+
+        const Clock = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+            </svg>
+        );
+
+        const Database = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+            </svg>
+        );
+
+        const BarChart3 = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M3 3v18h18"/>
+                <path d="M18 17V9"/>
+                <path d="M13 17V5"/>
+                <path d="M8 17v-3"/>
+            </svg>
+        );
+
+        const DollarSign = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <line x1="12" y1="2" x2="12" y2="22"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        );
+
+        const Shield = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/>
+            </svg>
+        );
+
+        const Zap = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+            </svg>
+        );
+
+        const Users = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        );
+
+        const ClearFirmDemo = () => {
+            const [currentStep, setCurrentStep] = useState(1);
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [requestId, setRequestId] = useState('');
+            const [apiResponse, setApiResponse] = useState(null);
+            
+            // Demo business data
+            const demoData = {
+                business_name: "PRIMARY AIR HEATING & COOLING INC",
+                ein: "65-0240115",
+                address: {
+                    street: "2708 81ST AVE E",
+                    city: "ELLENTON",
+                    state: "FL",
+                    zip: "34222"
+                }
+            };
+
+            const simulateApiSubmission = async () => {
+                setIsSubmitting(true);
+                setCurrentStep(2);
+                
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const mockRequestId = `AFT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+                setRequestId(mockRequestId);
+                setCurrentStep(3);
+                
+                // Simulate processing time
+                await new Promise(resolve => setTimeout(resolve, 2500));
+                
+                // Mock the actual API response structure with comprehensive data
+                const mockResponse = {
+                    status: "success",
+                    request_id: mockRequestId,
+                    completed_date: new Date().toISOString(),
+                    data: {
+                        business_info: {
+                            ein: "65-0240115",
+                            owner: { name: "DOUGLAS CARDUCCI", title: "CEO/Owner" },
+                            state: "FL",
+                            address: { zip: "34222-3323", city: "ELLENTON", state: "FL", street: "2708 81ST AVE E" },
+                            industry: { naics_code: "238220", description: "Plumbing, Heating, and Air-Conditioning Contractors" },
+                            legal_name: "PRIMARY AIR HEATING & COOLING INC",
+                            entity_type: "S-Corporation",
+                            established_date: "1991-02-01",
+                            filing_status: "COMPLIANT",
+                            business_legitimacy: "VERIFIED"
+                        },
+                        risk_indicators: {
+                            risk_level: "MODERATE-HIGH",
+                            risk_factors: [
+                                { factor: "Missing Annual Return", severity: "CRITICAL", description: "2024 S-Corporation return not filed despite extension", impact: "High compliance risk" },
+                                { factor: "Interest Coverage Below Threshold", severity: "MEDIUM", description: "Interest coverage ratio of 1.16x below minimum acceptable 2.5x", impact: "Cash flow concern" },
+                                { factor: "Rapid Payroll Expansion", severity: "MEDIUM", description: "285% payroll growth requires careful cash flow monitoring", impact: "Operational scaling risk" }
+                            ],
+                            recommendation: "Enhanced monitoring required - Address compliance gaps immediately",
+                            compliance_status: "CURRENT WITH CRITICAL GAP",
+                            overall_risk_score: 68,
+                            fraud_indicators: {
+                                synthetic_business_risk: "LOW",
+                                revenue_misrepresentation_risk: "LOW",
+                                document_authenticity: "VERIFIED"
+                            }
+                        },
+                        financial_endpoints: {
+                            asset_growth: 342.9,
+                            gross_profit: 1143010,
+                            revenue_2022: 1172377,
+                            revenue_2023: 1987291,
+                            revenue_2021: 890234,
+                            total_assets: 442762,
+                            profit_margin: 3.9,
+                            revenue_growth: 69.5,
+                            payroll_expense: 802480,
+                            interest_expense: 67745,
+                            operating_income: 78498,
+                            retained_earnings: 103914,
+                            debt_to_equity: 0.32,
+                            current_ratio: 2.1,
+                            quick_ratio: 1.8,
+                            working_capital: 125000,
+                            industry_comparison: {
+                                revenue_percentile: 85,
+                                growth_percentile: 92,
+                                profitability_percentile: 45
+                            }
+                        },
+                        smart_form_discovery: {
+                            alerts: [
+                                { type: "Missing Annual Return", severity: "CRITICAL", description: "2024 S-Corporation return not filed despite extension being granted" }
+                            ],
+                            missing_filings: [
+                                { form: "S-Corporation Return", tax_year: "2024", extension_deadline: "2025-09-15" }
+                            ],
+                            tax_forms_filed: ["S-Corporation Return (2023)", "Quarterly Employment Returns (Current)", "Annual Unemployment Returns"],
+                            compliance_status: "CURRENT WITH CRITICAL GAP",
+                            filing_requirements: {
+                                quarterly_payroll: "CURRENT",
+                                annual_returns: "MISSING_2024",
+                                state_compliance: "CURRENT"
+                            }
+                        }
+                    }
+                };
+                
+                setApiResponse(mockResponse);
+                setCurrentStep(4);
+                setIsSubmitting(false);
+            };
+
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                }).format(amount);
+            };
+
+            const getRiskColor = (level) => {
+                switch(level) {
+                    case 'LOW': return 'text-green-700 bg-green-50 border-green-200';
+                    case 'MODERATE': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+                    case 'MODERATE-HIGH': return 'text-orange-700 bg-orange-50 border-orange-200';
+                    case 'HIGH': return 'text-red-700 bg-red-50 border-red-200';
+                    default: return 'text-gray-700 bg-gray-50 border-gray-200';
+                }
+            };
+
+            const getSeverityColor = (severity) => {
+                switch(severity) {
+                    case 'CRITICAL': return 'text-red-700 bg-red-50 border-red-200';
+                    case 'HIGH': return 'text-orange-700 bg-orange-50 border-orange-200';
+                    case 'MEDIUM': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+                    case 'LOW': return 'text-green-700 bg-green-50 border-green-200';
+                    default: return 'text-gray-700 bg-gray-50 border-gray-200';
+                }
+            };
+
+            return React.createElement('div', {
+                className: "min-h-screen",
+                style: { background: 'linear-gradient(135deg, #F3F0E8 0%, #ffffff 100%)' }
+            }, 
+                React.createElement('div', { className: "max-w-7xl mx-auto p-6" },
+                    
+                    // Header with ClearFirm Branding
+                    React.createElement('div', { className: "text-center mb-8" },
+                        React.createElement('div', { className: "mb-4" },
+                            React.createElement('h1', { 
+                                className: "text-5xl font-light text-gray-800 tracking-tight" 
+                            }, 
+                                "Clear",
+                                React.createElement('span', { className: "font-bold" }, "Firm")
+                            )
+                        ),
+                        React.createElement('h2', { className: "text-2xl font-light text-gray-700 mb-2" }, "Live API Demo"),
+                        React.createElement('p', { className: "text-lg text-gray-600 mb-4" }, "The Modern Alternative to Dun & Bradstreet"),
+                        
+                        // Value Props Banner
+                        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto" },
+                            React.createElement('div', { 
+                                className: "flex items-center justify-center p-3 rounded-lg",
+                                style: { backgroundColor: '#F3F0E8' }
+                            },
+                                React.createElement(DollarSign, { 
+                                    className: "w-5 h-5 mr-2", 
+                                    style: { color: '#6B7B3A' } 
+                                }),
+                                React.createElement('span', { className: "text-sm font-semibold text-gray-700" }, "$5/verification vs $150+")
+                            ),
+                            React.createElement('div', { 
+                                className: "flex items-center justify-center p-3 rounded-lg",
+                                style: { backgroundColor: '#F3F0E8' }
+                            },
+                                React.createElement(Zap, { 
+                                    className: "w-5 h-5 mr-2", 
+                                    style: { color: '#071F52' } 
+                                }),
+                                React.createElement('span', { className: "text-sm font-semibold text-gray-700" }, "60min vs 2-3 days")
+                            ),
+                            React.createElement('div', { 
+                                className: "flex items-center justify-center p-3 rounded-lg",
+                                style: { backgroundColor: '#F3F0E8' }
+                            },
+                                React.createElement(Shield, { 
+                                    className: "w-5 h-5 mr-2", 
+                                    style: { color: '#AA523C' } 
+                                }),
+                                React.createElement('span', { className: "text-sm font-semibold text-gray-700" }, "121 fields vs 15-20")
+                            ),
+                            React.createElement('div', { 
+                                className: "flex items-center justify-center p-3 rounded-lg",
+                                style: { backgroundColor: '#F3F0E8' }
+                            },
+                                React.createElement(Users, { 
+                                    className: "w-5 h-5 mr-2", 
+                                    style: { color: '#6B7B3A' } 
+                                }),
+                                React.createElement('span', { className: "text-sm font-semibold text-gray-700" }, "Real vs Estimated")
+                            )
+                        )
+                    ),
+
+                    // Progress Steps
+                    React.createElement('div', { className: "flex justify-center mb-12" },
+                        React.createElement('div', { className: "flex items-center space-x-6" },
+                            [
+                                { num: 1, label: 'Submit Request', icon: Send },
+                                { num: 2, label: 'Processing', icon: Clock },
+                                { num: 3, label: 'Analyzing Data', icon: BarChart3 },
+                                { num: 4, label: 'Reports Ready', icon: CheckCircle }
+                            ].map((step, index) => 
+                                React.createElement('div', { key: step.num, className: "flex items-center" },
+                                    React.createElement('div', {
+                                        className: `flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+                                            currentStep >= step.num 
+                                                ? 'bg-green-600 border-green-600 text-white shadow-lg' 
+                                                : 'bg-white border-gray-300 text-gray-500'
+                                        }`,
+                                        style: {
+                                            backgroundColor: currentStep >= step.num ? '#6B7B3A' : 'white',
+                                            borderColor: currentStep >= step.num ? '#6B7B3A' : '#d1d5db'
+                                        }
+                                    },
+                                        currentStep > step.num 
+                                            ? React.createElement(CheckCircle, { className: "w-6 h-6" })
+                                            : React.createElement(step.icon, { className: "w-6 h-6" })
+                                    ),
+                                    React.createElement('div', { className: "ml-3" },
+                                        React.createElement('div', {
+                                            className: `text-sm font-medium transition-colors ${
+                                                currentStep >= step.num ? 'text-green-700' : 'text-gray-500'
+                                            }`,
+                                            style: {
+                                                color: currentStep >= step.num ? '#6B7B3A' : '#6b7280'
+                                            }
+                                        }, step.label)
+                                    ),
+                                    index < 3 && React.createElement('div', {
+                                        className: `ml-6 w-12 h-0.5 transition-colors ${
+                                            currentStep > step.num ? 'bg-green-600' : 'bg-gray-300'
+                                        }`,
+                                        style: {
+                                            backgroundColor: currentStep > step.num ? '#6B7B3A' : '#d1d5db'
+                                        }
+                                    })
+                                )
+                            )
+                        )
+                    ),
+
+                    // Step 1: Business Input
+                    currentStep === 1 && React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8 mb-8 border border-gray-100" },
+                        React.createElement('h2', { className: "text-2xl font-semibold mb-6 flex items-center text-gray-800" },
+                            React.createElement(Send, { 
+                                className: "w-6 h-6 mr-3",
+                                style: { color: '#6B7B3A' }
+                            }),
+                            "Step 1: Submit Business Request"
+                        ),
+                        
+                        React.createElement('div', { className: "bg-gray-50 rounded-lg border p-6 mb-6" },
+                            React.createElement('h3', { className: "font-semibold mb-3 text-gray-700" }, "API Endpoint:"),
+                            React.createElement('div', { className: "font-mono text-sm bg-gray-800 text-green-400 px-4 py-3 rounded" },
+                                "POST https://clearfirm-api.onrender.com/api/v1/requests"
+                            ),
+                            React.createElement('div', { className: "mt-4 text-sm text-gray-600" },
+                                React.createElement('div', { className: "font-medium mb-2" }, "Required Headers:"),
+                                React.createElement('div', { className: "font-mono bg-gray-100 px-3 py-2 rounded" },
+                                    "x-api-key: your_api_key_here",
+                                    React.createElement('br'),
+                                    "Content-Type: application/json"
+                                )
+                            )
+                        ),
+
+                        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" },
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-semibold text-gray-700 mb-2" }, "Business Name"),
+                                React.createElement('input', {
+                                    type: "text",
+                                    value: demoData.business_name,
+                                    readOnly: true,
+                                    className: "w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 focus:outline-none"
+                                })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-semibold text-gray-700 mb-2" }, "EIN"),
+                                React.createElement('input', {
+                                    type: "text",
+                                    value: demoData.ein,
+                                    readOnly: true,
+                                    className: "w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 focus:outline-none"
+                                })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-semibold text-gray-700 mb-2" }, "State"),
+                                React.createElement('input', {
+                                    type: "text",
+                                    value: demoData.address.state,
+                                    readOnly: true,
+                                    className: "w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 focus:outline-none"
+                                })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-semibold text-gray-700 mb-2" }, "ZIP Code"),
+                                React.createElement('input', {
+                                    type: "text",
+                                    value: demoData.address.zip,
+                                    readOnly: true,
+                                    className: "w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 focus:outline-none"
+                                })
+                            )
+                        ),
+
+                        // Pain Points Addressed
+                        React.createElement('div', { 
+                            className: "bg-blue-50 rounded-lg p-6 mb-6 border-l-4",
+                            style: { borderColor: '#071F52' }
+                        },
+                            React.createElement('h4', { className: "font-semibold text-gray-800 mb-3" }, "Pain Points We Solve:"),
+                            React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-4 text-sm" },
+                                [
+                                    "No more manual verification processes",
+                                    "Detect revenue misrepresentation instantly",
+                                    "Identify fraudulent business applications",
+                                    "Replace unreliable D&B estimates"
+                                ].map((point, index) =>
+                                    React.createElement('div', { key: index, className: "flex items-start" },
+                                        React.createElement(CheckCircle, { 
+                                            className: "w-4 h-4 mr-2 mt-0.5 flex-shrink-0",
+                                            style: { color: '#6B7B3A' }
+                                        }),
+                                        React.createElement('span', null, point)
+                                    )
+                                )
+                            )
+                        ),
+
+                        React.createElement('button', {
+                            onClick: simulateApiSubmission,
+                            className: "px-8 py-4 text-white rounded-lg hover:opacity-90 flex items-center text-lg font-semibold transition-all duration-200 shadow-lg",
+                            style: { backgroundColor: '#6B7B3A' }
+                        },
+                            React.createElement(Send, { className: "w-5 h-5 mr-3" }),
+                            "Submit API Request"
+                        )
+                    ),
+
+                    // Step 2: Processing
+                    currentStep === 2 && React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-12 mb-8 text-center border border-gray-100" },
+                        React.createElement('div', { 
+                            className: "animate-spin w-16 h-16 mx-auto mb-6",
+                            style: { color: '#6B7B3A' }
+                        },
+                            React.createElement(Clock, { className: "w-16 h-16" })
+                        ),
+                        React.createElement('h2', { 
+                            className: "text-2xl font-semibold mb-3",
+                            style: { color: '#6B7B3A' }
+                        }, "Processing Request..."),
+                        React.createElement('p', { className: "text-gray-600 text-lg mb-4" }, "Connecting to our proprietary network"),
+                        React.createElement('div', { className: "text-sm text-gray-500" },
+                            "Typical turnaround: 30-60 minutes vs 2-3 days with traditional providers"
+                        )
+                    ),
+
+                    // Step 3: Analyzing
+                    currentStep === 3 && React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-12 mb-8 text-center border border-gray-100" },
+                        React.createElement('div', { 
+                            className: "animate-pulse w-16 h-16 mx-auto mb-6",
+                            style: { color: '#071F52' }
+                        },
+                            React.createElement(BarChart3, { className: "w-16 h-16" })
+                        ),
+                        React.createElement('h2', { 
+                            className: "text-2xl font-semibold mb-3",
+                            style: { color: '#071F52' }
+                        }, "Analyzing Business Intelligence..."),
+                        React.createElement('p', { className: "text-gray-600 mb-6 text-lg" },
+                            "Request ID: ",
+                            React.createElement('code', { className: "bg-blue-100 px-3 py-1 rounded font-mono text-sm" }, requestId)
+                        ),
+                        React.createElement('div', { className: "space-y-2 text-gray-700" },
+                            [
+                                "Validating business legitimacy (not synthetic)",
+                                "Connecting to proprietary accounting network",
+                                "Cross-referencing 121 verified data points",
+                                "Generating proprietary risk assessment"
+                            ].map((step, index) =>
+                                React.createElement('div', { key: index, className: "flex items-center justify-center" },
+                                    React.createElement(CheckCircle, { className: "w-5 h-5 mr-2 text-green-600" }),
+                                    step
+                                )
+                            )
+                        )
+                    ),
+
+                    // Step 4: Results
+                    currentStep === 4 && apiResponse && React.createElement('div', { className: "space-y-8" },
+                        React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8 text-center border border-gray-100" },
+                            React.createElement(CheckCircle, { className: "w-16 h-16 mx-auto mb-4 text-green-600" }),
+                            React.createElement('h2', { className: "text-2xl font-semibold text-green-700 mb-3" }, "Intelligence Report Complete!"),
+                            React.createElement('p', { className: "text-gray-600 text-lg mb-4" },
+                                "Request ID: ",
+                                React.createElement('code', { className: "bg-green-100 px-3 py-1 rounded font-mono text-sm" }, apiResponse.request_id)
+                            ),
+                            React.createElement('div', { className: "text-sm text-gray-500" },
+                                "Processing time: 2.1 minutes • Cost: $5.00 (vs $150+ traditional)"
+                            )
+                        ),
+
+                        // API Endpoint Info
+                        React.createElement('div', { className: "bg-gray-50 rounded-lg border p-6" },
+                            React.createElement('h3', { className: "font-semibold mb-3 text-gray-700" }, "Retrieve Results API:"),
+                            React.createElement('div', { className: "font-mono text-sm bg-gray-800 text-green-400 px-4 py-3 rounded" },
+                                `GET https://clearfirm-api.onrender.com/api/v1/requests/${apiResponse.request_id}`
+                            )
+                        ),
+
+                        // Three Proprietary Reports - This is now the main focus
+                        React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-3 gap-8" },
+                            // Report 1: Business Intelligence Profile
+                            React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8 border border-gray-100" },
+                                React.createElement('h3', { className: "text-xl font-semibold mb-6 flex items-center" },
+                                    React.createElement(FileText, { 
+                                        className: "w-6 h-6 mr-3",
+                                        style: { color: '#071F52' }
+                                    }),
+                                    React.createElement('span', { style: { color: '#071F52' } }, "Business Intelligence Profile")
+                                ),
+                                React.createElement('div', { className: "space-y-4" },
+                                    React.createElement('div', { className: "bg-green-50 p-3 rounded-lg border border-green-200" },
+                                        React.createElement('span', { className: "font-semibold text-green-800 block" }, "Business Legitimacy:"),
+                                        React.createElement('div', { className: "text-green-700 font-medium" }, apiResponse.data.business_info.business_legitimacy),
+                                        React.createElement('div', { className: "text-xs text-green-600 mt-1" }, "Not a synthetic/fraudulent business")
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block" }, "Legal Name:"),
+                                        React.createElement('div', { className: "text-gray-600" }, apiResponse.data.business_info.legal_name)
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block" }, "Entity Type:"),
+                                        React.createElement('div', { className: "text-gray-600" }, apiResponse.data.business_info.entity_type)
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block" }, "Industry:"),
+                                        React.createElement('div', { className: "text-gray-600 text-sm" }, apiResponse.data.business_info.industry.description)
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block" }, "Years in Business:"),
+                                        React.createElement('div', { className: "text-gray-600" }, 
+                                            `${new Date().getFullYear() - new Date(apiResponse.data.business_info.established_date).getFullYear()} years (Est. ${new Date(apiResponse.data.business_info.established_date).getFullYear()})`
+                                        )
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block" }, "Filing Status:"),
+                                        React.createElement('div', { className: "text-gray-600" }, apiResponse.data.business_info.filing_status)
+                                    )
+                                ),
+                                React.createElement('div', { className: "mt-4 text-xs text-blue-600" },
+                                    "Addresses Affiniti's need to verify legitimate vs synthetic businesses"
+                                )
+                            ),
+
+                            // Report 2: Financial Intelligence
+                            React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8 border border-gray-100" },
+                                React.createElement('h3', { className: "text-xl font-semibold mb-6 flex items-center" },
+                                    React.createElement(TrendingUp, { 
+                                        className: "w-6 h-6 mr-3",
+                                        style: { color: '#6B7B3A' }
+                                    }),
+                                    React.createElement('span', { style: { color: '#6B7B3A' } }, "Financial Intelligence")
+                                ),
+                                React.createElement('div', { className: "space-y-4" },
+                                    React.createElement('div', { className: "bg-blue-50 p-3 rounded-lg border border-blue-200" },
+                                        React.createElement('span', { className: "font-semibold text-blue-800 block" }, "Revenue Verification:"),
+                                        React.createElement('div', { 
+                                            className: "text-lg font-bold",
+                                            style: { color: '#6B7B3A' }
+                                        }, formatCurrency(apiResponse.data.financial_endpoints.revenue_2023)),
+                                        React.createElement('div', { className: "text-xs text-blue-600" }, "Verified through proprietary accounting network")
+                                    ),
+                                    React.createElement('div', { className: "flex justify-between items-center" },
+                                        React.createElement('span', { className: "font-semibold text-gray-700" }, "3-Year Growth:"),
+                                        React.createElement('span', { 
+                                            className: "font-bold",
+                                            style: { color: '#6B7B3A' }
+                                        }, `+${apiResponse.data.financial_endpoints.revenue_growth}%`)
+                                    ),
+                                    React.createElement('div', { className: "flex justify-between items-center" },
+                                        React.createElement('span', { className: "font-semibold text-gray-700" }, "Profit Margin:"),
+                                        React.createElement('span', { className: "text-gray-600" }, `${apiResponse.data.financial_endpoints.profit_margin}%`)
+                                    ),
+                                    React.createElement('div', { className: "flex justify-between items-center" },
+                                        React.createElement('span', { className: "font-semibold text-gray-700" }, "Debt-to-Equity:"),
+                                        React.createElement('span', { className: "text-gray-600" }, apiResponse.data.financial_endpoints.debt_to_equity)
+                                    ),
+                                    React.createElement('div', { className: "flex justify-between items-center" },
+                                        React.createElement('span', { className: "font-semibold text-gray-700" }, "Current Ratio:"),
+                                        React.createElement('span', { className: "text-gray-600" }, apiResponse.data.financial_endpoints.current_ratio)
+                                    ),
+                                    React.createElement('div', { className: "flex justify-between items-center" },
+                                        React.createElement('span', { className: "font-semibold text-gray-700" }, "Working Capital:"),
+                                        React.createElement('span', { className: "text-gray-600" }, formatCurrency(apiResponse.data.financial_endpoints.working_capital))
+                                    ),
+                                    React.createElement('div', { className: "pt-3 border-t" },
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block mb-2" }, "Industry Benchmarking:"),
+                                        React.createElement('div', { className: "text-sm space-y-1" },
+                                            React.createElement('div', null, "Revenue Percentile: ", React.createElement('span', { className: "font-medium" }, "85th")),
+                                            React.createElement('div', null, "Growth Percentile: ", React.createElement('span', { className: "font-medium" }, "92nd"))
+                                        )
+                                    )
+                                ),
+                                React.createElement('div', { className: "mt-4 text-xs text-blue-600" },
+                                    "Prevents revenue misrepresentation through proprietary network verification"
+                                )
+                            ),
+
+                            // Report 3: Risk & Compliance Intelligence
+                            React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8 border border-gray-100" },
+                                React.createElement('h3', { className: "text-xl font-semibold mb-6 flex items-center" },
+                                    React.createElement(AlertTriangle, { 
+                                        className: "w-6 h-6 mr-3",
+                                        style: { color: '#AA523C' }
+                                    }),
+                                    React.createElement('span', { style: { color: '#AA523C' } }, "Risk & Compliance Intelligence")
+                                ),
+                                React.createElement('div', { className: "space-y-4" },
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block mb-2" }, "Overall Risk Level:"),
+                                        React.createElement('span', { 
+                                            className: `px-3 py-1 rounded-full text-sm font-semibold border ${getRiskColor(apiResponse.data.risk_indicators.risk_level)}`
+                                        }, apiResponse.data.risk_indicators.risk_level)
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block" }, "Risk Score:"),
+                                        React.createElement('div', { className: "flex items-baseline mt-1" },
+                                            React.createElement('span', { 
+                                                className: "text-3xl font-bold",
+                                                style: { color: '#AA523C' }
+                                            }, apiResponse.data.risk_indicators.overall_risk_score),
+                                            React.createElement('span', { className: "text-gray-500 ml-1" }, "/100")
+                                        )
+                                    ),
+                                    
+                                    React.createElement('div', { className: "bg-red-50 p-3 rounded-lg border border-red-200" },
+                                        React.createElement('span', { className: "font-semibold text-red-800 block mb-2" }, "Fraud Risk Assessment:"),
+                                        React.createElement('div', { className: "text-sm space-y-1" },
+                                            React.createElement('div', null, "Synthetic Business: ", React.createElement('span', { className: "font-medium text-green-700" }, apiResponse.data.risk_indicators.fraud_indicators.synthetic_business_risk)),
+                                            React.createElement('div', null, "Revenue Fraud: ", React.createElement('span', { className: "font-medium text-green-700" }, apiResponse.data.risk_indicators.fraud_indicators.revenue_misrepresentation_risk))
+                                        )
+                                    ),
+
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block mb-3" }, "Critical Risk Factors:"),
+                                        React.createElement('div', { className: "space-y-3" },
+                                            apiResponse.data.risk_indicators.risk_factors.slice(0, 2).map((risk, index) =>
+                                                React.createElement('div', { 
+                                                    key: index, 
+                                                    className: "border-l-4 pl-3",
+                                                    style: { borderColor: '#AA523C' }
+                                                },
+                                                    React.createElement('span', { 
+                                                        className: `px-2 py-1 rounded text-xs font-semibold border ${getSeverityColor(risk.severity)}`
+                                                    }, risk.severity),
+                                                    React.createElement('div', { className: "text-sm text-gray-600 mt-1" }, risk.factor),
+                                                    React.createElement('div', { className: "text-xs text-gray-500 mt-1" }, risk.impact)
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    
+                                    React.createElement('div', { className: "pt-4 border-t border-gray-200" },
+                                        React.createElement('span', { className: "font-semibold text-gray-700 block" }, "Compliance Status:"),
+                                        React.createElement('div', { className: "text-sm text-gray-600 mt-1" }, apiResponse.data.risk_indicators.compliance_status),
+                                        React.createElement('div', { className: "text-xs text-gray-500 mt-2" },
+                                            `Quarterly payroll: ${apiResponse.data.smart_form_discovery.filing_requirements.quarterly_payroll}`
+                                        )
+                                    )
+                                ),
+                                React.createElement('div', { className: "mt-4 text-xs text-blue-600" },
+                                    "Weeds out fraudsters and non-compliant businesses that pose risk to lenders"
+                                )
+                            )
+                        ),
+
+                        // ROI Calculation - Now comes after the reports
+                        React.createElement('div', { className: "bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border" },
+                            React.createElement('h3', { 
+                                className: "text-xl font-semibold mb-4 text-center",
+                                style: { color: '#071F52' }
+                            }, "Your ROI With ClearFirm"),
+                            React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-6 text-center" },
+                                React.createElement('div', null,
+                                    React.createElement('div', { className: "text-2xl font-bold text-red-600" }, "$150,000"),
+                                    React.createElement('div', { className: "text-sm text-gray-600" }, "Traditional Cost", React.createElement('br'), "(1,000 verifications/month)")
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('div', { 
+                                        className: "text-2xl font-bold",
+                                        style: { color: '#6B7B3A' }
+                                    }, "$5,000"),
+                                    React.createElement('div', { className: "text-sm text-gray-600" }, "ClearFirm Cost", React.createElement('br'), "(1,000 verifications/month)")
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('div', { className: "text-2xl font-bold text-blue-600" }, "$1.74M"),
+                                    React.createElement('div', { className: "text-sm text-gray-600" }, "Annual Savings", React.createElement('br'), "(97% cost reduction)")
+                                )
+                            )
+                        ),
+
+                        // Integration Benefits
+                        React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8 border" },
+                            React.createElement('h3', { className: "text-xl font-semibold mb-6 text-center text-gray-800" },
+                                "Why ClearFirm vs Traditional Providers"
+                            ),
+                            React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-8" },
+                                React.createElement('div', null,
+                                    React.createElement('h4', { className: "font-semibold text-red-600 mb-4" }, "❌ Traditional Providers (D&B, etc.)"),
+                                    React.createElement('ul', { className: "space-y-2 text-sm text-gray-600" },
+                                        [
+                                            "• $150+ per verification",
+                                            "• 2-3 days turnaround",
+                                            "• Only 15-20 estimated data points",
+                                            "• Manual downloads, no API",
+                                            "• Revenue estimates often 300% off",
+                                            "• Can't detect synthetic businesses",
+                                            "• No fraud risk assessment"
+                                        ].map((item, index) => React.createElement('li', { key: index }, item))
+                                    )
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('h4', { 
+                                        className: "font-semibold mb-4",
+                                        style: { color: '#6B7B3A' }
+                                    }, "✅ ClearFirm"),
+                                    React.createElement('ul', { className: "space-y-2 text-sm text-gray-700" },
+                                        [
+                                            "• $5 per verification (97% savings)",
+                                            "• 30-60 minutes turnaround",
+                                            "• 121 verified data fields",
+                                            "• Full API integration",
+                                            "• Proprietary network verification",
+                                            "• Synthetic business detection",
+                                            "• Comprehensive fraud assessment"
+                                        ].map((item, index) => React.createElement('li', { key: index }, item))
+                                    )
+                                )
+                            )
+                        ),
+
+                        // JSON Response Preview
+                        React.createElement('div', { className: "bg-gray-50 rounded-lg border p-6" },
+                            React.createElement('h3', { className: "font-semibold mb-4 text-gray-700" }, "Raw API Response (121 Data Fields):"),
+                            React.createElement('div', { className: "bg-gray-900 text-green-400 p-6 rounded-lg text-sm overflow-auto max-h-48 font-mono" },
+                                JSON.stringify(apiResponse, null, 2)
+                            )
+                        ),
+
+                        // Call to Action
+                        React.createElement('div', { className: "text-center space-y-4" },
+                            React.createElement('div', { className: "bg-gradient-to-r from-blue-600 to-green-600 text-white p-6 rounded-xl" },
+                                React.createElement('h3', { className: "text-xl font-semibold mb-2" }, "Ready to Transform Your Underwriting?"),
+                                React.createElement('p', { className: "mb-4" }, "Start your 7-day free trial with 5 verifications included"),
+                                React.createElement('div', { className: "text-sm opacity-90" },
+                                    "Volume pricing available: 1,000+ monthly verifications at $5 each"
+                                )
+                            ),
+                            
+                            React.createElement('button', {
+                                onClick: () => {
+                                    setCurrentStep(1);
+                                    setApiResponse(null);
+                                    setRequestId('');
+                                },
+                                className: "px-8 py-3 text-white rounded-lg hover:opacity-90 font-semibold transition-all duration-200 shadow-lg mr-4",
+                                style: { backgroundColor: '#071F52' }
+                            }, "Run Demo Again"),
+                            
+                            React.createElement('button', {
+                                className: "px-8 py-3 text-white rounded-lg hover:opacity-90 font-semibold transition-all duration-200 shadow-lg",
+                                style: { backgroundColor: '#6B7B3A' }
+                            }, "Start Free Trial")
+                        )
+                    )
+                )
+            );
+        };
+
+        ReactDOM.render(React.createElement(ClearFirmDemo), document.getElementById('root'));
+    </script>
+</body>
+</html>
