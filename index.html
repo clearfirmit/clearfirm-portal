@@ -229,10 +229,221 @@
             </div>
 
             <!-- Business Grid -->
-            <div id="businessGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Business cards will be inserted here -->
-            </div>
+            <!-- Replace the businessGrid div with this table structure -->
+<div id="businessTable" class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('request_id')">
+                    Request ID ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('business_name')">
+                    Business Name ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('ein')">
+                    EIN ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('status')">
+                    Status ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('risk_score')">
+                    Risk Score ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('risk_level')">
+                    Risk Level ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('revenue')">
+                    Revenue ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('requested_at')">
+                    Requested ↕
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+            <!-- Rows will be inserted here -->
+        </tbody>
+    </table>
+</div>
 
+<!-- Add Export JSON button above the table -->
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold">Business Verifications</h2>
+    <div class="space-x-2">
+        <button onclick="exportJSON()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+            Export JSON for Taktile
+        </button>
+        <button onclick="downloadCSV()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            Download CSV
+        </button>
+    </div>
+</div>
+
+<script>
+// Display businesses in table format
+function displayBusinessesTable(businesses) {
+    const tbody = document.getElementById('tableBody');
+    
+    tbody.innerHTML = businesses.map(b => `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                ${b.request_id || b.ein || '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                ${b.business_name}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.ein}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${b.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                    ${b.status}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.risk_score || '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${b.risk_level?.includes('CRITICAL') ? 'bg-red-100 text-red-800' : 
+                      b.risk_level?.includes('HIGH') ? 'bg-orange-100 text-orange-800' :
+                      b.risk_level?.includes('MODERATE') ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'}">
+                    ${b.risk_level || '-'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.revenue || '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.requested_at ? new Date(b.requested_at).toLocaleDateString() : '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button onclick="viewJSON('${b.ein}')" class="text-indigo-600 hover:text-indigo-900 mr-2">
+                    View JSON
+                </button>
+                <button onclick="copyJSON('${b.ein}')" class="text-green-600 hover:text-green-900">
+                    Copy JSON
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Export all data as JSON for Taktile
+function exportJSON() {
+    const jsonData = JSON.stringify(allBusinesses, null, 2);
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clearfirm_verifications_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    alert('JSON exported for Taktile integration');
+}
+
+// View individual business JSON
+function viewJSON(ein) {
+    const business = allBusinesses.find(b => b.ein === ein);
+    const jsonStr = JSON.stringify(business, null, 2);
+    
+    // Create modal to show JSON
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+    modal.innerHTML = `
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">JSON Data for ${business.business_name}</h3>
+                <pre class="bg-gray-100 p-4 rounded overflow-x-auto text-sm">${jsonStr}</pre>
+                <div class="mt-4 flex justify-end space-x-2">
+                    <button onclick="this.closest('.fixed').remove()" 
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Close
+                    </button>
+                    <button onclick="navigator.clipboard.writeText('${jsonStr.replace(/'/g, "\\'")}')" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Copy individual business JSON
+function copyJSON(ein) {
+    const business = allBusinesses.find(b => b.ein === ein);
+    const jsonStr = JSON.stringify(business, null, 2);
+    navigator.clipboard.writeText(jsonStr);
+    alert('JSON copied to clipboard');
+}
+
+// Sort table
+let sortOrder = {};
+function sortTable(column) {
+    sortOrder[column] = !sortOrder[column];
+    
+    filteredBusinesses.sort((a, b) => {
+        let aVal = a[column] || '';
+        let bVal = b[column] || '';
+        
+        if (column === 'risk_score') {
+            aVal = parseInt(aVal) || 0;
+            bVal = parseInt(bVal) || 0;
+        }
+        
+        if (sortOrder[column]) {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+    
+    displayBusinessesTable(filteredBusinesses);
+}
+
+// Download as CSV
+function downloadCSV() {
+    const headers = ['Request ID', 'Business Name', 'EIN', 'Status', 'Risk Score', 'Risk Level', 'Revenue', 'Requested Date'];
+    const csvContent = [
+        headers.join(','),
+        ...allBusinesses.map(b => [
+            b.request_id || b.ein,
+            `"${b.business_name}"`,
+            b.ein,
+            b.status,
+            b.risk_score || '',
+            b.risk_level || '',
+            b.revenue || '',
+            b.requested_at || ''
+        ].join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clearfirm_verifications_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+// Update the main display function to use table
+function displayBusinesses(businesses) {
+    displayBusinessesTable(businesses);
+}
+</script>
             <!-- No Results Message -->
             <div id="noResults" class="hidden text-center py-12">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -423,6 +634,161 @@
                     console.log(`Loaded ${allBusinesses.length} businesses`);
                     filteredBusinesses = [...allBusinesses];
                     displayBusinesses(filteredBusinesses);
+                  // Display businesses in table format
+function displayBusinessesTable(businesses) {
+    const tbody = document.getElementById('tableBody');
+    
+    tbody.innerHTML = businesses.map(b => `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                ${b.request_id || b.ein || '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                ${b.business_name}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.ein}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${b.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                    ${b.status}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.risk_score || '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${b.risk_level?.includes('CRITICAL') ? 'bg-red-100 text-red-800' : 
+                      b.risk_level?.includes('HIGH') ? 'bg-orange-100 text-orange-800' :
+                      b.risk_level?.includes('MODERATE') ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'}">
+                    ${b.risk_level || '-'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.revenue || '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${b.requested_at ? new Date(b.requested_at).toLocaleDateString() : '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button onclick="viewJSON('${b.ein}')" class="text-indigo-600 hover:text-indigo-900 mr-2">
+                    View JSON
+                </button>
+                <button onclick="copyJSON('${b.ein}')" class="text-green-600 hover:text-green-900">
+                    Copy JSON
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Export all data as JSON for Taktile
+function exportJSON() {
+    const jsonData = JSON.stringify(allBusinesses, null, 2);
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clearfirm_verifications_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    alert('JSON exported for Taktile integration');
+}
+
+// View individual business JSON
+function viewJSON(ein) {
+    const business = allBusinesses.find(b => b.ein === ein);
+    const jsonStr = JSON.stringify(business, null, 2);
+    
+    // Create modal to show JSON
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+    modal.innerHTML = `
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">JSON Data for ${business.business_name}</h3>
+                <pre class="bg-gray-100 p-4 rounded overflow-x-auto text-sm">${jsonStr}</pre>
+                <div class="mt-4 flex justify-end space-x-2">
+                    <button onclick="this.closest('.fixed').remove()" 
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Close
+                    </button>
+                    <button onclick="navigator.clipboard.writeText(\`${jsonStr.replace(/`/g, '\\`')}\`)" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Copy individual business JSON
+function copyJSON(ein) {
+    const business = allBusinesses.find(b => b.ein === ein);
+    const jsonStr = JSON.stringify(business, null, 2);
+    navigator.clipboard.writeText(jsonStr);
+    alert('JSON copied to clipboard');
+}
+
+// Sort table
+let sortOrder = {};
+function sortTable(column) {
+    sortOrder[column] = !sortOrder[column];
+    
+    filteredBusinesses.sort((a, b) => {
+        let aVal = a[column] || '';
+        let bVal = b[column] || '';
+        
+        if (column === 'risk_score') {
+            aVal = parseInt(aVal) || 0;
+            bVal = parseInt(bVal) || 0;
+        }
+        
+        if (sortOrder[column]) {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+    
+    displayBusinessesTable(filteredBusinesses);
+}
+
+// Download as CSV
+function downloadCSV() {
+    const headers = ['Request ID', 'Business Name', 'EIN', 'Status', 'Risk Score', 'Risk Level', 'Revenue', 'Requested Date'];
+    const csvContent = [
+        headers.join(','),
+        ...allBusinesses.map(b => [
+            b.request_id || b.ein,
+            `"${b.business_name}"`,
+            b.ein,
+            b.status,
+            b.risk_score || '',
+            b.risk_level || '',
+            b.revenue || '',
+            b.requested_at || ''
+        ].join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clearfirm_verifications_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
                     updateLastUpdated();
                 } else if (businessResponse.status === 401) {
                     // Unauthorized - token might be expired
@@ -453,18 +819,18 @@
 
         // Display businesses
         function displayBusinesses(businesses) {
-            const grid = document.getElementById('businessGrid');
-            const noResults = document.getElementById('noResults');
+    const noResults = document.getElementById('noResults');
 
-            if (businesses.length === 0) {
-                grid.innerHTML = '';
-                noResults.classList.remove('hidden');
-                return;
-            }
+    if (businesses.length === 0) {
+        document.getElementById('businessTable').style.display = 'none';
+        noResults.classList.remove('hidden');
+        return;
+    }
 
-            noResults.classList.add('hidden');
-            grid.innerHTML = businesses.map(business => createBusinessCard(business)).join('');
-        }
+    noResults.classList.add('hidden');
+    document.getElementById('businessTable').style.display = 'block';
+    displayBusinessesTable(businesses);
+}
 
         // Create business card HTML
         function createBusinessCard(business) {
