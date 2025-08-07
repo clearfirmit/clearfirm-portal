@@ -229,58 +229,59 @@
             </div>
 
             <!-- Business Grid -->
-            <!-- Replace the businessGrid div with this table structure -->
-<div id="businessTable" class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('request_id')">
-                    Request ID ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('business_name')">
-                    Business Name ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('ein')">
-                    EIN ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('status')">
-                    Status ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('risk_score')">
-                    Risk Score ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('risk_level')">
-                    Risk Level ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('revenue')">
-                    Revenue ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('requested_at')">
-                    Requested ↕
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                </th>
-            </tr>
-        </thead>
-        <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
-            <!-- Rows will be inserted here -->
-        </tbody>
-    </table>
-</div>
+            <!-- Business Grid -->
+            <!-- Add Export JSON button above the table -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Business Verifications</h2>
+                <div class="space-x-2">
+                    <button onclick="exportJSON()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        Export JSON for Taktile
+                    </button>
+                    <button onclick="downloadCSV()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Download CSV
+                    </button>
+                </div>
+            </div>
 
-<!-- Add Export JSON button above the table -->
-<div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold">Business Verifications</h2>
-    <div class="space-x-2">
-        <button onclick="exportJSON()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-            Export JSON for Taktile
-        </button>
-        <button onclick="downloadCSV()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            Download CSV
-        </button>
-    </div>
-</div>
+            <!-- Business Table -->
+            <div id="businessTable" class="bg-white rounded-lg shadow overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('request_id')">
+                                Request ID ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('business_name')">
+                                Business Name ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('ein')">
+                                EIN ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('status')">
+                                Status ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('risk_score')">
+                                Risk Score ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('risk_level')">
+                                Risk Level ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('revenue')">
+                                Revenue ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onclick="sortTable('requested_at')">
+                                Requested ↕
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
 
 <script>
 // Display businesses in table format
