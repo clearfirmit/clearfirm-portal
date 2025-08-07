@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClearFirm - Business Intelligence Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+   <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -375,7 +375,7 @@ GET https://api.getclearfirm.com/v1/businesses/82-4459460/financials
         </div>
     </div>
 
-    <script>
+        function copyAPICall() {<script>
         // Check if user is logged in on page load
         window.addEventListener('DOMContentLoaded', function() {
             const isLoggedIn = localStorage.getItem('clearfirm_logged_in');
@@ -416,78 +416,155 @@ GET https://api.getclearfirm.com/v1/businesses/82-4459460/financials
         }
 
         function showDashboard() {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            
-            // Update user email in header
-            const email = localStorage.getItem('clearfirm_user_email') || 'joseph@affiniti.com';
-            document.getElementById('userEmail').textContent = email;
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    
+    // Update user email in header
+    const email = localStorage.getItem('clearfirm_user_email') || 'joseph@affiniti.com';
+    document.getElementById('userEmail').textContent = email;
+    
+    // Load real data from API
+function showDashboard() {
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+
+    // Update user email in header
+    const email = localStorage.getItem('clearfirm_user_email') || 'joseph@affiniti.com';
+    document.getElementById('userEmail').textContent = email;
+
+    // Load real data from API
+    loadRealData();
+}
+
+
+// Add this new function to load real data
+async function loadRealData() {
+    try {
+        // Get overview stats from API
+        const overviewResponse = await fetch('https://clearfirm-api.onrender.com/api/dashboard/overview');
+        const overview = await overviewResponse.json();
+        
+        // Get all businesses from API
+        const businessesResponse = await fetch('https://clearfirm-api.onrender.com/api/dashboard/businesses');
+        const businesses = await businessesResponse.json();
+        
+        // Update the stats cards
+        const statsElements = document.querySelectorAll('.text-3xl.font-bold');
+        if (statsElements[0]) statsElements[0].textContent = overview.completed || '0';
+        
+        // Filter for completed businesses
+        const completedBusinesses = businesses.filter(b => b.status === 'completed');
+        
+        // Update the request history table
+        const tableBody = document.querySelector('tbody');
+        if (tableBody) {
+            tableBody.innerHTML = completedBusinesses.slice(0, 5).map(business => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">${business.business_name}</div>
+                            <div class="text-sm text-gray-500">EIN: ${business.ein}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <code class="text-xs bg-gray-100 px-2 py-1 rounded">AFT-${Date.now()}-${business.ein.substring(0,3)}</code>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                            Completed
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        ${business.risk_score ? `Risk: ${business.risk_score}` : 'Processing'}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        ${new Date().toLocaleDateString()}
+                    </td>
+                    <td class="px-6 py-4">
+                        <button onclick="copyEndpoint('${business.ein}')" class="text-clearfirm-ocean hover:text-clearfirm-green text-sm font-medium">
+                            Copy Endpoint
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
         }
-
-        function dismissNotification() {
-            document.querySelector('.bg-green-50.border-l-4').style.display = 'none';
+        
+        // Update the notification with latest business
+        if (completedBusinesses.length > 0) {
+            const latest = completedBusinesses[0];
+            const notificationText = document.querySelector('.text-green-700 p');
+            if (notificationText) {
+                notificationText.innerHTML = `<strong>${latest.business_name}</strong> data is now accessible via API endpoints. EIN: ${latest.ein}`;
+            }
         }
-
-        function copyAPICall() {
-            const apiCall = 'curl -X GET "https://api.getclearfirm.com/v1/businesses/27-1251416/financials" -H "Authorization: Bearer aft_prod_8a983877-71d2-4719-81c6-b21580ce781e"';
-            navigator.clipboard.writeText(apiCall).then(() => {
-                showToast('API call copied to clipboard!');
-            });
+        
+    } catch (error) {
+        console.error('Error loading real data:', error);
+    }
+}
+        
+        // Update the notification with latest business
+        if (completedBusinesses.length > 0) {
+            const latest = completedBusinesses[0];
+            const notificationText = document.querySelector('.text-green-700 p');
+            if (notificationText) {
+                notificationText.innerHTML = `<strong>${latest.business_name}</strong> data is now accessible via API endpoints. EIN: ${latest.ein}`;
+            }
         }
+        
+    } catch (error) {
+        console.error('Error loading real data:', error);
+    }
+}
 
-        function copyEndpoint(ein) {
-            const endpoint = `https://api.getclearfirm.com/v1/businesses/${ein}/financials`;
-            navigator.clipboard.writeText(endpoint).then(() => {
-                showToast('Endpoint copied to clipboard!');
-            });
-        }
+function dismissNotification() {
+    document.querySelector('.bg-green-50.border-l-4').style.display = 'none';
+}
 
-        function viewEndpoints() {
-            document.getElementById('endpointsModal').classList.remove('hidden');
-        }
+function copyAPICall() {
+    const apiCall = 'curl https://clearfirm-api.onrender.com/api/dashboard/businesses';
+    navigator.clipboard.writeText(apiCall).then(() => {
+        showToast('API call copied to clipboard!');
+    });
+}
 
-        function closeEndpointsModal() {
-            document.getElementById('endpointsModal').classList.add('hidden');
-        }
+function copyEndpoint(ein) {
+    const endpoint = `https://clearfirm-api.onrender.com/api/dashboard/business/${ein}`;
+    navigator.clipboard.writeText(endpoint).then(() => {
+        showToast('Endpoint copied to clipboard!');
+    });
+}
 
-        function copyAllEndpoints() {
-            const endpoints = `# ClearFirm API Sample Endpoints
-# Authorization: Bearer aft_prod_8a983877-71d2-4719-81c6-b21580ce781e
+function viewEndpoints() {
+    document.getElementById('endpointsModal').classList.remove('hidden');
+}
 
-# LTC RX INC (Latest)
-GET https://api.getclearfirm.com/v1/businesses/27-1251416/financials
-GET https://api.getclearfirm.com/v1/businesses/27-1251416/risk
+function closeEndpointsModal() {
+    document.getElementById('endpointsModal').classList.add('hidden');
+}
 
-# PRN PHARMACIES, LTD.
-GET https://api.getclearfirm.com/v1/businesses/37-1124259/financials
+function copyAllEndpoints() {
+    const endpoints = `# ClearFirm API Real Endpoints
+# Live Data from clearfirm-api.onrender.com
 
-# Star Discount Pharmacy
-GET https://api.getclearfirm.com/v1/businesses/63-1242375/financials`;
+# Get All Businesses
+GET https://clearfirm-api.onrender.com/api/dashboard/businesses
 
-            navigator.clipboard.writeText(endpoints).then(() => {
-                showToast('Sample endpoints copied to clipboard!');
-            });
-        }
+# Get Portfolio Overview
+GET https://clearfirm-api.onrender.com/api/dashboard/overview
 
-        function showAllBusinesses() {
-            showToast('Feature coming soon - Full business list expansion');
-        }
+# Get Specific Business (Wiregrass Drugs)
+GET https://clearfirm-api.onrender.com/api/dashboard/business/63-0710985
 
-        function refreshRequests() {
-            showToast('Requests refreshed');
-        }
+# Get Specific Business (Pharmacy Investment)
+GET https://clearfirm-api.onrender.com/api/dashboard/business/59-3737369`;
 
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            const bgColor = type === 'error' ? 'bg-red-600' : 'bg-green-600';
-            toast.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg z-50`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
+    navigator.clipboard.writeText(endpoints).then(() => {
+        showToast('All endpoints copied to clipboard!');
+    });
+}
+
+
     </script>
 </body>
 </html>
